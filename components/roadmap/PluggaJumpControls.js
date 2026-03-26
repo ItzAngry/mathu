@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Button from '@/components/ui/Button'
 import {
   getJumpStack,
@@ -14,21 +14,22 @@ import { revertAutoCompletedNodes } from '@/lib/actions/progress'
 
 export default function PluggaJumpControls() {
   const router = useRouter()
+  // Start at 0 to match SSR; read localStorage after commit (avoids hydration mismatch).
   const [depth, setDepth] = useState(0)
   const [busy, setBusy] = useState(false)
-  const [bannerDismissed, setBannerDismissed] = useState(false)
-
-  const sync = useCallback(() => setDepth(getJumpStack().length), [])
+  /** Depth at which the user hid the banner; show again when depth changes. */
+  const [bannerHiddenAtDepth, setBannerHiddenAtDepth] = useState(null)
 
   useEffect(() => {
-    sync()
+    function sync() {
+      setDepth(getJumpStack().length)
+    }
+    queueMicrotask(sync)
     window.addEventListener(JUMP_STACK_EVENT, sync)
     return () => window.removeEventListener(JUMP_STACK_EVENT, sync)
-  }, [sync])
+  }, [])
 
-  useEffect(() => {
-    setBannerDismissed(false)
-  }, [depth])
+  const showBanner = depth > 0 && bannerHiddenAtDepth !== depth
 
   async function handleRevertLast() {
     const stack = getJumpStack()
@@ -80,7 +81,7 @@ export default function PluggaJumpControls() {
     router.refresh()
   }
 
-  if (depth === 0 || bannerDismissed) return null
+  if (!showBanner) return null
 
   return (
     <div className="px-3 sm:px-4 py-2.5 border-t border-amber-200/80 bg-amber-50/95 text-sm">
@@ -116,7 +117,7 @@ export default function PluggaJumpControls() {
           <button
             type="button"
             aria-label="Dölj meddelande"
-            onClick={() => setBannerDismissed(true)}
+            onClick={() => setBannerHiddenAtDepth(depth)}
             className="w-8 h-8 rounded-full flex items-center justify-center text-amber-900/70 hover:bg-amber-200/80 transition-colors focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-2"
           >
             <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5" aria-hidden="true">

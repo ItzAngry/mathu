@@ -18,9 +18,8 @@ function scrollToLessonAnchor(behavior = 'smooth') {
 
 export default function PluggaRoadmapList({ chapters, nodesByChapter, progressMap }) {
   const pathname = usePathname()
-  const [skippedIds, setSkippedIds] = useState(() =>
-    typeof window !== 'undefined' ? new Set(getSkippedChapterIds()) : new Set()
-  )
+  // Empty until after mount — must match SSR; localStorage is synced in useEffect.
+  const [skippedIds, setSkippedIds] = useState(() => new Set())
   const [anchorInView, setAnchorInView] = useState(true)
 
   useEffect(() => {

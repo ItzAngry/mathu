@@ -38,9 +38,8 @@ export default function RoadmapChapter({
   const [skipModalOpen, setSkipModalOpen] = useState(false)
   const [skipLoading, setSkipLoading] = useState(false)
   const [restartLoading, setRestartLoading] = useState(false)
-  const [skippedIds, setSkippedIds] = useState(() =>
-    typeof window !== 'undefined' ? new Set(getSkippedChapterIds()) : new Set()
-  )
+  // Empty until after mount — must match SSR; localStorage is synced in useEffect.
+  const [skippedIds, setSkippedIds] = useState(() => new Set())
 
   useEffect(() => {
     function syncSkipped() {
