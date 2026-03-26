@@ -33,8 +33,8 @@ export default function LoginPage() {
           ))}
         </div>
         <div className="relative z-10 text-center">
-          <Image src="/mathu-logo.svg" alt="Mathu mascot" width={120} height={108} className="mb-6 mx-auto" />
-          <h1 className="text-4xl font-bold mb-3">Mathu</h1>
+          <Image src="/mathu-logo.svg" alt="MathU mascot" width={120} height={108} className="mb-6 mx-auto" />
+          <h1 className="text-4xl font-bold mb-3">MathU</h1>
           <p className="text-xl text-white/80 max-w-xs">
             Din personliga matematikresa – från nybörjare till mästare.
           </p>
@@ -46,8 +46,8 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <Image src="/mathu-logo.svg" alt="Mathu mascot" width={100} height={100} className="mb-3 mx-auto" />
-            <h1 className="text-3xl font-bold text-primary">Mathu</h1>
+            <Image src="/mathu-logo.svg" alt="MathU mascot" width={100} height={100} className="mb-3 mx-auto" />
+            <h1 className="text-3xl font-bold text-primary">MathU</h1>
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl p-8 border border-border">

@@ -224,6 +224,30 @@ function NodeForm({ node, onSave, onCancel }) {
         <span className="text-text-muted text-xs">(syns för elever)</span>
       </label>
 
+      {/* Nationellt prov */}
+      <div className="border-t border-border pt-3 space-y-2">
+        <label className="flex items-center gap-2.5 text-sm cursor-pointer select-none">
+          <input
+            type="checkbox" name="is_national_exam"
+            defaultChecked={node.is_national_exam ?? false}
+            className="w-4 h-4 accent-primary rounded"
+            id="is_national_exam_check"
+          />
+          <span className="font-medium text-text">Nationellt prov (Ma1b)</span>
+        </label>
+        <div>
+          <label htmlFor="exam_year" className="block text-xs font-medium text-text-muted mb-1">År (t.ex. 2022)</label>
+          <input
+            id="exam_year"
+            type="number" name="exam_year"
+            defaultValue={node.exam_year ?? ''}
+            min={2000} max={2100}
+            placeholder="Provår"
+            className="w-32 px-3 py-1.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+      </div>
+
       <div className="flex gap-2 pt-1 border-t border-border">
         <Button type="submit" variant="primary" size="sm" loading={saving} fullWidth>
           {node.id ? 'Spara ändringar' : 'Skapa nod'}

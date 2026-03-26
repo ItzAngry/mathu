@@ -8,10 +8,34 @@ const SIZE_MAP = {
   large: { outer: 88, inner: 72, fontSize: '1.75rem' },
 }
 
+// Inline SVG icons for node types (no emoji)
+const BookIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ width: '50%', height: '50%' }}>
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+  </svg>
+)
+
+const PencilIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ width: '50%', height: '50%' }}>
+    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+  </svg>
+)
+
+const TrophyIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ width: '50%', height: '50%' }}>
+    <polyline points="8 21 12 17 16 21" />
+    <line x1="12" y1="17" x2="12" y2="12" />
+    <path d="M7 4H4a2 2 0 0 0-2 2v3a4 4 0 0 0 4 4h1" />
+    <path d="M17 4h3a2 2 0 0 1 2 2v3a4 4 0 0 1-4 4h-1" />
+    <rect x="7" y="2" width="10" height="10" rx="2" />
+  </svg>
+)
+
 const TYPE_ICON = {
-  intro: '📖',
-  practice: '✏️',
-  test: '🏆',
+  intro: BookIcon,
+  practice: PencilIcon,
+  test: TrophyIcon,
 }
 
 const TYPE_LABEL = {
@@ -55,17 +79,17 @@ export default function RoadmapNode({ node, progress, isActive, onClick }) {
   const isClickable = status !== 'locked'
 
   const outerColor = {
-    completed: '#22C55E',
-    'in-progress': '#6C63FF',
-    available: '#6C63FF',
-    locked: '#E5E7EB',
+    completed: '#22c55e',
+    'in-progress': '#2e3758',
+    available: '#2e3758',
+    locked: '#adb8c0',
   }[status]
 
   const innerColor = {
-    completed: '#DCFCE7',
-    'in-progress': '#EEF0FF',
-    available: '#EEF0FF',
-    locked: '#F9FAFB',
+    completed: '#dcfce7',
+    'in-progress': '#eef1f2',
+    available: '#eef1f2',
+    locked: '#eef1f2',
   }[status]
 
   return (
@@ -94,12 +118,13 @@ export default function RoadmapNode({ node, progress, isActive, onClick }) {
       >
         {/* Inner circle */}
         <div
-          className="rounded-full flex items-center justify-center"
+          className={[
+            'rounded-full flex items-center justify-center',
+            status === 'locked' ? 'text-text-muted/60' : status === 'completed' ? 'text-success' : 'text-primary',
+          ].join(' ')}
           style={{ width: inner, height: inner, backgroundColor: innerColor }}
         >
-          <span style={{ fontSize }} role="img" aria-hidden="true">
-            {TYPE_ICON[node.type]}
-          </span>
+          {(() => { const Icon = TYPE_ICON[node.type]; return Icon ? <Icon /> : null })()}
         </div>
 
         {/* Badge */}
