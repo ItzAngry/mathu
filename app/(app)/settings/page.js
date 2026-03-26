@@ -158,7 +158,7 @@ export default function SettingsPage() {
           <section className="bg-white rounded-2xl border border-border p-6 mb-6">
             <h2 className="text-lg font-semibold text-text mb-4">{t.settings.gradeGoal}</h2>
             <div className="flex gap-2 flex-wrap" role="radiogroup" aria-label="Välj betygsmål">
-              {['E', 'D', 'C', 'B', 'A'].map((g) => (
+              {['E', 'C', 'A'].map((g) => (
                 <button
                   key={g}
                   type="button"

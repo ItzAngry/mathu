@@ -21,7 +21,7 @@ export default function ProvClient({ testNodes, progressMap }) {
       <div className="max-w-3xl mx-auto px-6 py-8">
         {testNodes.length === 0 ? (
           <div className="text-center py-20 text-text-muted">
-            <div className="text-5xl mb-4">📝</div>
+            <div className="text-5xl mb-4"></div>
             <p>Inga prov tillgängliga ännu.</p>
           </div>
         ) : (
@@ -43,7 +43,7 @@ export default function ProvClient({ testNodes, progressMap }) {
                     style={{ backgroundColor: (chapter?.color ?? '#6C63FF') + '22' }}
                     aria-hidden="true"
                   >
-                    🏆
+                    
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-text">{node.title}</p>

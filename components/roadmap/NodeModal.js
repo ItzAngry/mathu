@@ -98,7 +98,7 @@ export default function NodeModal({ node, progress, onClose }) {
           ].join(' ')}
         >
           <div className={isIntro ? 'text-4xl' : 'text-3xl'} aria-hidden="true">
-            {node.type === 'intro' ? '📖' : node.type === 'practice' ? '✏️' : '🏆'}
+            {node.type === 'intro' ? '' : node.type === 'practice' ? '' : ''}
           </div>
           <div className="flex-1">
             <h2
@@ -165,7 +165,7 @@ export default function NodeModal({ node, progress, onClose }) {
           ) : isPractice ? (
             <div className="text-center py-4">
               <div className="text-5xl mb-4" aria-hidden="true">
-                {node.type === 'test' ? '📝' : '💪'}
+                {node.type === 'test' ? '' : ''}
               </div>
               <p className="text-text-muted text-sm mb-6">
                 {node.type === 'test'

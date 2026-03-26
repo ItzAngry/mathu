@@ -67,7 +67,7 @@ export default function FragorClient({ chapters, gradeGoal }) {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col items-center gap-6 text-center py-12"
               >
-                <div className="text-6xl">{score >= 80 ? '🏆' : score >= 60 ? '⭐' : '💪'}</div>
+                <div className="text-6xl">{score >= 80 ? '' : score >= 60 ? '' : ''}</div>
                 <div>
                   <p className="text-3xl font-bold text-text">{score}%</p>
                   <p className="text-text-muted mt-1">
@@ -85,7 +85,7 @@ export default function FragorClient({ chapters, gradeGoal }) {
               </motion.div>
             ) : questions.length === 0 ? (
               <div className="text-center py-12 text-text-muted">
-                <div className="text-5xl mb-4">📚</div>
+                <div className="text-5xl mb-4"></div>
                 <p>Inga frågor tillgängliga för detta kapitel.</p>
               </div>
             ) : (
