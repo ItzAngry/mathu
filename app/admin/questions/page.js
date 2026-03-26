@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabaseServer'
 import AdminQuestionsClient from './AdminQuestionsClient'
 
+export const metadata = { title: 'Frågor – Admin' }
+
 export default async function AdminQuestionsPage() {
   const supabase = await createClient()
 
