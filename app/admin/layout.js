@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabaseServer'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
+import AdminNav from './AdminNav'
 
-export const metadata = { title: 'Admin' }
+export const metadata = { title: 'Admin – MathU' }
 
 export default async function AdminLayout({ children }) {
   const supabase = await createClient()
@@ -16,37 +16,17 @@ export default async function AdminLayout({ children }) {
 
   return (
     <div className="flex min-h-screen bg-surface">
-      {/* Admin sidebar */}
+      {/* Sidebar */}
       <nav
-        className="fixed left-0 top-0 h-full w-56 bg-white border-r border-border flex flex-col py-6 px-4"
+        className="fixed left-0 top-0 h-full w-56 flex flex-col py-6 px-3"
+        style={{ backgroundColor: '#2e3758' }}
         aria-label="Admin navigation"
       >
-        <div className="mb-8 px-2">
-          <Link href="/plugga" className="text-xs text-text-muted hover:text-primary transition-colors">
-            ← Tillbaka till kursen
-          </Link>
-          <h1 className="text-xl font-bold text-text mt-2">Admin</h1>
-        </div>
-        <ul className="flex flex-col gap-1" role="list">
-          {[
-            { href: '/admin', label: 'Översikt' },
-            { href: '/admin/roadmap', label: 'Kursträd' },
-            { href: '/admin/questions', label: 'Frågor' },
-            { href: '/admin/tests', label: 'Prov & Noder' },
-          ].map(({ href, label }) => (
-            <li key={href}>
-              <Link
-                href={href}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-text-muted hover:bg-surface hover:text-text transition-all focus-visible:outline-2 focus-visible:outline-primary"
-              >
-                {label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <AdminNav />
       </nav>
 
-      <main className="flex-1 ml-56 p-8">
+      {/* Main content */}
+      <main className="flex-1 ml-56 min-h-screen">
         {children}
       </main>
     </div>
