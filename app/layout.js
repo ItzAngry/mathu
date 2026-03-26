@@ -13,12 +13,12 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: {
-    default: 'Mathu – Matematik 1b',
-    template: '%s | Mathu',
+    default: 'MathU – Matematik 1b',
+    template: '%s | MathU',
   },
-  description: 'Lär dig Matematik 1b på ett roligt och effektivt sätt med Mathu.',
+  description: 'Lär dig Matematik 1b på ett roligt och effektivt sätt med MathU.',
   keywords: ['matematik', 'matte1b', 'gymnasiet', 'lärande', 'mathu'],
-  authors: [{ name: 'Mathu' }],
+  authors: [{ name: 'MathU' }],
 }
 
 export default function RootLayout({ children }) {

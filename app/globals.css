@@ -4,18 +4,18 @@
    Custom theme tokens (Tailwind v4)
    ============================================================ */
 @theme {
-  --color-primary: #6C63FF;
-  --color-primary-dark: #574ECC;
-  --color-primary-light: #EEF0FF;
-  --color-success: #22C55E;
-  --color-success-light: #DCFCE7;
+  --color-primary: #2e3758;
+  --color-primary-dark: #1e2847;
+  --color-primary-light: #eef1f2;
+  --color-success: #22c55e;
+  --color-success-light: #dcfce7;
   --color-warning: #F59E0B;
   --color-danger: #EF4444;
-  --color-surface: #F9FAFB;
-  --color-surface-2: #F3F4F6;
-  --color-border: #E5E7EB;
+  --color-surface: #eef1f2;
+  --color-surface-2: #dde4e8;
+  --color-border: #adb8c0;
   --color-text: #111827;
-  --color-text-muted: #6B7280;
+  --color-text-muted: #6e89a0;
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -122,10 +122,10 @@ html[data-font="dyslexic"] .font-mono {
    ============================================================ */
 @keyframes node-pulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.4);
+    box-shadow: 0 0 0 0 rgba(46, 55, 88, 0.4);
   }
   50% {
-    box-shadow: 0 0 0 12px rgba(108, 99, 255, 0);
+    box-shadow: 0 0 0 12px rgba(46, 55, 88, 0);
   }
 }
 
@@ -143,12 +143,12 @@ html[data-font="dyslexic"] .font-mono {
   --foreground: #f1f5f9;
 
   /* Override Tailwind @theme tokens */
-  --color-surface: #1e293b;
-  --color-surface-2: #273549;
-  --color-border: #334155;
+  --color-surface: #1a2035;
+  --color-surface-2: #232d45;
+  --color-border: #3a4a62;
   --color-text: #f1f5f9;
-  --color-text-muted: #94a3b8;
-  --color-primary-light: #2d2b60;
+  --color-text-muted: #8da5be;
+  --color-primary-light: #1e2847;
   --color-success-light: #14532d;
 }
 

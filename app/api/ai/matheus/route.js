@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabaseServer'
-import { callMathew } from '@/lib/ai'
+import { callMatheus } from '@/lib/ai'
+import { enqueue } from '@/lib/aiQueue'
 
 export async function POST(request) {
   const supabase = await createClient()
@@ -17,13 +18,21 @@ export async function POST(request) {
     .eq('id', user.id)
     .single()
 
-  const result = await callMathew({
-    question,
-    userAnswer,
-    correctAnswer,
-    customUrl: profile?.mathew_api_url || undefined,
-    mode,
-  })
+  let result
+  try {
+    result = await enqueue(() => callMatheus({
+      question,
+      userAnswer,
+      correctAnswer,
+      customUrl: profile?.mathew_api_url || undefined,
+      mode,
+    }))
+  } catch (err) {
+    if (err.status === 429) {
+      return NextResponse.json({ error: err.message }, { status: 429 })
+    }
+    throw err
+  }
 
   return NextResponse.json(result)
 }

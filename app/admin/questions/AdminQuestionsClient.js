@@ -19,6 +19,11 @@ const EMPTY_QUESTION = {
   order_index: 0,
 }
 
+// Helper: question has any digital tool enabled
+function hasDigitalTools(q) {
+  return Boolean(q.has_geogebra || q.requires_canvas || q.allows_calculator)
+}
+
 export default function AdminQuestionsClient({ chapters, nodes, questions: initialQuestions }) {
   const [questions, setQuestions] = useState(initialQuestions)
   const [editing, setEditing] = useState(null) // null | question object
@@ -212,21 +217,11 @@ export default function AdminQuestionsClient({ chapters, nodes, questions: initi
 
                   <div className="flex flex-wrap gap-x-4 gap-y-2">
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="checkbox" name="requires_canvas" defaultChecked={editing.requires_canvas}
-                        className="accent-primary w-4 h-4" />
-                      Kräver canvas
-                    </label>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="checkbox" name="allows_calculator" defaultChecked={Boolean(editing.allows_calculator)}
-                        className="accent-primary w-4 h-4" />
-                      Tillåt miniräknare
-                    </label>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="checkbox" name="has_geogebra" defaultChecked={editing.has_geogebra}
+                      <input type="checkbox" name="digital_tools" defaultChecked={hasDigitalTools(editing)}
                         className="accent-primary w-4 h-4" />
                       <span>
-                        GeoGebra-grafritare{' '}
-                        <span className="text-text-muted font-normal">(inbäddad tom arbetsyta)</span>
+                        Digitala verktyg{' '}
+                        <span className="text-text-muted font-normal">(miniräknare, GeoGebra, rityta)</span>
                       </span>
                     </label>
                   </div>

@@ -69,7 +69,7 @@ const SUGGESTIONS = [
 
 const GREETING = 'Hej! Jag är Matheus. Jag är din personliga AI-matematiklärare för Matte 1b. Fråga mig vad som helst — jag förklarar, hjälper dig lösa problem och ger tips på hur du kan förbättra din förståelse.'
 
-export default function MathewPage() {
+export default function MatheusPage() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -97,7 +97,7 @@ export default function MathewPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/ai/mathew', {
+      const res = await fetch('/api/ai/matheus', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userAnswer: userText, mode: 'chat' }),

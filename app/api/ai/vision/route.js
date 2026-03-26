@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabaseServer'
 import { callVision } from '@/lib/ai'
+import { enqueue } from '@/lib/aiQueue'
 
 export async function POST(request) {
   const supabase = await createClient()
@@ -21,13 +22,21 @@ export async function POST(request) {
     .eq('id', user.id)
     .single()
 
-  const result = await callVision({
-    question,
-    userAnswer,
-    correctAnswer,
-    imageBase64,
-    customUrl: profile?.qwen_api_url || undefined,
-  })
+  let result
+  try {
+    result = await enqueue(() => callVision({
+      question,
+      userAnswer,
+      correctAnswer,
+      imageBase64,
+      customUrl: profile?.qwen_api_url || undefined,
+    }))
+  } catch (err) {
+    if (err.status === 429) {
+      return NextResponse.json({ error: err.message }, { status: 429 })
+    }
+    throw err
+  }
 
   return NextResponse.json(result)
 }

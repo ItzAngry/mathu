@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import CanvasInput from './CanvasInput'
 import GeoGebraEmbed from './GeoGebraEmbed'
@@ -37,6 +37,29 @@ export default function AnswerChecker({
   /** Stack-läge (t.ex. Frågor): samma flikar */
   const [stackTab, setStackTab] = useState('canvas')
   const canvasRef = useRef(null)
+  /** Dragbar separator — vänster panel bredd i procent (default 30%) */
+  const [leftWidth, setLeftWidth] = useState(30)
+  const containerRef = useRef(null)
+  const dragging = useRef(false)
+
+  const startDrag = useCallback((e) => {
+    e.preventDefault()
+    dragging.current = true
+
+    function onMove(ev) {
+      if (!dragging.current || !containerRef.current) return
+      const rect = containerRef.current.getBoundingClientRect()
+      const pct = ((ev.clientX - rect.left) / rect.width) * 100
+      setLeftWidth(Math.min(50, Math.max(20, pct)))
+    }
+    function onUp() {
+      dragging.current = false
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -64,7 +87,7 @@ export default function AnswerChecker({
       } else {
         // ── Text only → send to MATHEW model ──────────────────────────
         // (different IP, text-only model)
-        result = await fetch('/api/ai/mathew', {
+        result = await fetch('/api/ai/matheus', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -75,7 +98,7 @@ export default function AnswerChecker({
         }).then((r) => r.json())
       }
 
-      // Mathew uses reasoning_content { CorrectAnswer: True/False }
+      // Matheus uses reasoning_content { CorrectAnswer: True/False }
       // Vision uses JSON { is_correct, method_correct, final_answer_correct, completeness, feedback }
       setExplanation(result.explanation || '')
 
@@ -140,15 +163,17 @@ export default function AnswerChecker({
           className="flex flex-col items-center gap-3 py-6 bg-success-light rounded-2xl"
           role="status"
         >
-          <div className="text-5xl">🎉</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-12 h-12 text-success" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
           <p className="text-success font-bold text-lg">Rätt svar!</p>
           {explanation && (
             <p className="text-sm text-text-muted px-4 text-center leading-relaxed">{explanation}</p>
           )}
           {visionDetail && (
             <div className="flex flex-wrap gap-2 justify-center mt-1">
-              <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Metod: ✓</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Slutsvar: ✓</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Metod: OK</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Slutsvar: OK</span>
               <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
                 {visionDetail.completeness === 'complete'
                   ? 'Komplett'
@@ -174,7 +199,9 @@ export default function AnswerChecker({
           role="alert"
         >
           <div className="flex items-center gap-2">
-            <span className="text-2xl">😔</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-danger shrink-0" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             <p className="text-danger font-semibold">Fel svar</p>
           </div>
           {explanation && <p className="text-sm text-text-muted leading-relaxed">{explanation}</p>}
@@ -183,12 +210,12 @@ export default function AnswerChecker({
               <span
                 className={`text-xs px-2 py-0.5 rounded-full ${visionDetail.methodCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
               >
-                Metod: {visionDetail.methodCorrect ? '✓' : '✗'}
+                Metod: {visionDetail.methodCorrect ? 'OK' : 'Fel'}
               </span>
               <span
                 className={`text-xs px-2 py-0.5 rounded-full ${visionDetail.finalAnswerCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
               >
-                Slutsvar: {visionDetail.finalAnswerCorrect ? '✓' : '✗'}
+                Slutsvar: {visionDetail.finalAnswerCorrect ? 'OK' : 'Fel'}
               </span>
               <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
                 {visionDetail.completeness === 'complete'
@@ -234,7 +261,7 @@ export default function AnswerChecker({
           <span className="text-primary font-medium text-sm">
             {canvasHasContent
               ? 'Analyserar din lösning med Vision-AI...'
-              : 'Mathew kontrollerar ditt svar...'}
+              : 'Matheus kontrollerar ditt svar...'}
           </span>
         </motion.div>
       )}
@@ -280,19 +307,10 @@ export default function AnswerChecker({
 
   if (isSplit) {
     return (
-      <div className="flex flex-col lg:flex-row flex-1 min-h-0 w-full">
+      <div ref={containerRef} className="flex flex-col lg:flex-row flex-1 min-h-0 w-full">
         <div
-          className={[
-            'flex flex-col gap-4 min-w-0 min-h-0 overflow-y-auto p-4 sm:p-5 lg:p-6 transition-[flex-basis] duration-200 ease-out',
-            showRightPanel
-              ? [
-                  'flex-1 basis-0 min-h-[min(50dvh,420px)] lg:min-h-0 lg:flex-none border-border lg:border-r',
-                  splitWideTools
-                    ? 'lg:w-1/3 lg:max-w-[33.333%] lg:basis-1/3'
-                    : 'lg:w-1/2 lg:max-w-[50%] lg:basis-1/2',
-                ].join(' ')
-              : 'flex-1 max-w-2xl mx-auto w-full',
-          ].join(' ')}
+          className="flex flex-col gap-4 min-w-0 min-h-0 overflow-y-auto p-4 sm:p-5 lg:p-6"
+          style={showRightPanel ? { width: `${leftWidth}%`, minWidth: '20%' } : { flex: 1, maxWidth: '42rem', margin: '0 auto', width: '100%' }}
         >
           {splitTopExtras ? <div className="space-y-3 shrink-0">{splitTopExtras}</div> : null}
           {questionBlock}
@@ -308,12 +326,20 @@ export default function AnswerChecker({
           )}
         </div>
 
+        {/* Dragbar separator */}
+        {showRightPanel && (
+          <div
+            role="separator"
+            aria-label="Dra för att justera storlek"
+            onMouseDown={startDrag}
+            className="hidden lg:flex w-1.5 shrink-0 cursor-col-resize bg-border hover:bg-primary/30 active:bg-primary/50 transition-colors items-center justify-center"
+          />
+        )}
+
         {showRightPanel && (
           <aside
-            className={[
-              'flex flex-col w-full flex-1 basis-0 min-h-[min(52dvh,480px)] lg:min-h-[min(52dvh,520px)] lg:flex-none shrink-0 bg-surface-2/60 border-t lg:border-t-0 lg:border-l border-border transition-[flex-basis] duration-200 ease-out',
-              splitWideTools ? 'lg:w-2/3 lg:max-w-[66.667%] lg:basis-2/3' : 'lg:w-1/2 lg:max-w-[50%] lg:basis-1/2',
-            ].join(' ')}
+            className="flex flex-col min-h-[min(52dvh,480px)] lg:min-h-0 shrink-0 bg-surface-2/60 border-t lg:border-t-0 border-border"
+            style={{ width: `${100 - leftWidth}%`, minWidth: '50%' }}
           >
             {showGeoGebra ? (
               <div className="flex flex-col flex-1 min-h-0">
@@ -508,8 +534,10 @@ export default function AnswerChecker({
                       className="flex items-center gap-2 text-sm text-primary hover:text-primary-dark font-medium transition-colors w-fit"
                       aria-expanded={showCanvas}
                     >
-                      <span aria-hidden="true">{showCanvas ? '▼' : '▶'}</span>
-                      {showCanvas ? 'Dölj rityta' : '✏️ Visa rityta'}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 shrink-0" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d={showCanvas ? 'M19 9l-7 7-7-7' : 'M9 5l7 7-7 7'} />
+                      </svg>
+                      {showCanvas ? 'Dölj rityta' : 'Visa rityta'}
                     </button>
                     <p className="text-[11px] text-text-muted">Dra i nedre högra hörnet för att ändra höjd.</p>
                     <AnimatePresence>
@@ -541,8 +569,10 @@ export default function AnswerChecker({
                 className="flex items-center gap-2 text-sm text-primary hover:text-primary-dark font-medium transition-colors w-fit"
                 aria-expanded={showCanvas}
               >
-                <span aria-hidden="true">{showCanvas ? '▼' : '▶'}</span>
-                {showCanvas ? 'Dölj rityta' : '✏️ Rita din lösning'}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 shrink-0" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d={showCanvas ? 'M19 9l-7 7-7-7' : 'M9 5l7 7-7 7'} />
+                </svg>
+                {showCanvas ? 'Dölj rityta' : 'Rita din lösning'}
               </button>
               <AnimatePresence>
                 {showCanvas && (

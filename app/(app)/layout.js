@@ -19,9 +19,12 @@ export default async function AppLayout({ children }) {
     redirect('/onboarding')
   }
 
+  // Merge auth email into profile so UI can display it
+  const profileWithEmail = profile ? { ...profile, email: profile.email ?? user.email } : null
+
   return (
-    <AppProviders initialProfile={profile}>
-      <AppShell profile={profile}>
+    <AppProviders initialProfile={profileWithEmail}>
+      <AppShell profile={profileWithEmail}>
         {children}
       </AppShell>
     </AppProviders>

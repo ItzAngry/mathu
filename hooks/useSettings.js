@@ -11,5 +11,6 @@ export function useSettings() {
     updateSettings: ctx.updateSettings,
     sidebarCollapsed: ctx.sidebarCollapsed,
     toggleSidebar: ctx.toggleSidebar,
+    profile: ctx.profile,
   }
 }

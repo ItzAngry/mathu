@@ -130,15 +130,6 @@ export default function Sidebar({ profile }) {
           )}
         </Link>
 
-        {!sidebarCollapsed && (
-          <button
-            onClick={toggleSidebar}
-            aria-label="Dölj sidopanel"
-            className="p-1.5 rounded-lg text-text-muted hover:bg-surface hover:text-text transition-all focus-visible:outline-2 focus-visible:outline-primary"
-          >
-            <ChevronLeftIcon />
-          </button>
-        )}
       </div>
 
       {/* ── Main nav ───────────────────────────────────────────── */}
@@ -220,16 +211,19 @@ export default function Sidebar({ profile }) {
 
         <LogoutButton collapsed={sidebarCollapsed} />
 
-        {/* Expand button — only shown when collapsed */}
-        {sidebarCollapsed && (
-          <button
-            onClick={toggleSidebar}
-            aria-label="Expandera sidopanel"
-            className="flex items-center justify-center p-3 rounded-2xl text-text-muted hover:bg-surface hover:text-text transition-all duration-150 focus-visible:outline-2 focus-visible:outline-primary mt-0.5"
-          >
-            <ChevronRightIcon />
-          </button>
-        )}
+        {/* Toggle button — always visible at bottom, same position */}
+        <button
+          onClick={toggleSidebar}
+          aria-label={sidebarCollapsed ? 'Expandera sidopanel' : 'Dölj sidopanel'}
+          className={[
+            'flex items-center justify-center p-3 rounded-2xl text-text-muted',
+            'hover:bg-surface hover:text-text transition-all duration-150',
+            'focus-visible:outline-2 focus-visible:outline-primary mt-0.5',
+            sidebarCollapsed ? '' : '',
+          ].join(' ')}
+        >
+          {sidebarCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+        </button>
       </div>
     </nav>
   )

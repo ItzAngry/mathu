@@ -32,8 +32,7 @@ export default function RegisterPage() {
           ))}
         </div>
         <div className="relative z-10 text-center">
-          <div className="text-7xl mb-6" role="img" aria-label="Mathu mascot">🧮</div>
-          <h1 className="text-4xl font-bold mb-3">Mathu</h1>
+          <h1 className="text-4xl font-bold mb-3">MathU</h1>
           <p className="text-xl text-white/80 max-w-xs">
             Börja din matematikresa idag – gratis och anpassad för dig.
           </p>
@@ -44,8 +43,7 @@ export default function RegisterPage() {
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="lg:hidden text-center mb-8">
-            <div className="text-5xl mb-3">🧮</div>
-            <h1 className="text-3xl font-bold text-primary">Mathu</h1>
+            <h1 className="text-3xl font-bold text-primary">MathU</h1>
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl p-8 border border-border">

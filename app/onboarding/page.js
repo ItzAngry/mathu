@@ -19,7 +19,6 @@ export default function OnboardingPage() {
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="text-6xl mb-4" role="img" aria-label="Wave"></div>
           <h1 className="text-3xl font-bold text-text mb-2">Välkommen till MathU!</h1>
           <p className="text-text-muted text-lg">Vilket betyg siktar du på i Matematik 1b?</p>
           <p className="text-text-muted text-sm mt-2">
@@ -51,7 +50,6 @@ export default function OnboardingPage() {
                     : 'border-border bg-white hover:border-primary/40 hover:bg-surface',
                 ].join(' ')}
               >
-                <span className="text-2xl" aria-hidden="true">{grade.emoji}</span>
                 <div className="flex-1">
                   <div className="font-semibold text-text">{grade.label}</div>
                   <div className="text-sm text-text-muted">{grade.desc}</div>
