@@ -1,26 +1,168 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================================
+   Custom theme tokens (Tailwind v4)
+   ============================================================ */
+@theme {
+  --color-primary: #6C63FF;
+  --color-primary-dark: #574ECC;
+  --color-primary-light: #EEF0FF;
+  --color-success: #22C55E;
+  --color-success-light: #DCFCE7;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-surface: #F9FAFB;
+  --color-surface-2: #F3F4F6;
+  --color-border: #E5E7EB;
+  --color-text: #111827;
+  --color-text-muted: #6B7280;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-dyslexic: "OpenDyslexic", Arial, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================================
+   OpenDyslexic font
+   ============================================================ */
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("/fonts/OpenDyslexic-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("/fonts/OpenDyslexic-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================
+   Base styles
+   ============================================================ */
+:root {
+  --background: #ffffff;
+  --foreground: #111827;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   Dyslexia font toggle
+   Set data-font="dyslexic" on <html> element
+   ============================================================ */
+[data-font="dyslexic"] body,
+[data-font="dyslexic"] input,
+[data-font="dyslexic"] textarea,
+[data-font="dyslexic"] button {
+  font-family: var(--font-dyslexic) !important;
+  letter-spacing: 0.05em;
+  word-spacing: 0.1em;
+  line-height: 1.9;
+}
+
+/* ============================================================
+   Focus styles (accessibility — visible for keyboard users)
+   ============================================================ */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+/* ============================================================
+   Node pulse animation
+   ============================================================ */
+@keyframes node-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(108, 99, 255, 0);
+  }
+}
+
+.node-pulse {
+  animation: node-pulse 2s ease-in-out infinite;
+}
+
+/* ============================================================
+   Markdown content styling
+   ============================================================ */
+.prose-mathu h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #111827;
+}
+.prose-mathu h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #111827;
+}
+.prose-mathu p {
+  margin-bottom: 1rem;
+  color: #374151;
+  line-height: 1.8;
+}
+.prose-mathu ul, .prose-mathu ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+.prose-mathu li { margin-bottom: 0.25rem; }
+.prose-mathu strong { font-weight: 600; }
+.prose-mathu table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+.prose-mathu th, .prose-mathu td {
+  border: 1px solid #E5E7EB;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose-mathu th {
+  background: #F3F4F6;
+  font-weight: 600;
+}
+.prose-mathu code {
+  background: #F3F4F6;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
 }
