@@ -14,8 +14,8 @@ const EMPTY_QUESTION = {
   answer_aliases: '',
   grade_level: 'C',
   has_geogebra: false,
-  geogebra_id: '',
   requires_canvas: false,
+  allows_calculator: false,
   order_index: 0,
 }
 
@@ -210,27 +210,26 @@ export default function AdminQuestionsClient({ chapters, nodes, questions: initi
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
+                  <div className="flex flex-wrap gap-x-4 gap-y-2">
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <input type="checkbox" name="requires_canvas" defaultChecked={editing.requires_canvas}
                         className="accent-primary w-4 h-4" />
                       Kräver canvas
                     </label>
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" name="allows_calculator" defaultChecked={Boolean(editing.allows_calculator)}
+                        className="accent-primary w-4 h-4" />
+                      Tillåt miniräknare
+                    </label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <input type="checkbox" name="has_geogebra" defaultChecked={editing.has_geogebra}
                         className="accent-primary w-4 h-4" />
-                      Har GeoGebra
+                      <span>
+                        GeoGebra-grafritare{' '}
+                        <span className="text-text-muted font-normal">(inbäddad tom arbetsyta)</span>
+                      </span>
                     </label>
                   </div>
-
-                  {editing.has_geogebra && (
-                    <div>
-                      <label className="block text-sm font-medium text-text mb-1">GeoGebra Material ID</label>
-                      <input type="text" name="geogebra_id" defaultValue={editing.geogebra_id}
-                        placeholder="t.ex. abc123"
-                        className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all" />
-                    </div>
-                  )}
 
                   <div className="flex gap-3 pt-2">
                     <Button type="submit" variant="primary" size="md" loading={saving} fullWidth>

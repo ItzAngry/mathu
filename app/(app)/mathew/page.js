@@ -2,39 +2,43 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 
-// ── Mascot placeholder ─────────────────────────────────────────────────────
-// Replace this component with <Image src="/mascot.png" ... /> when ready
-function MascotPlaceholder({ size = 96 }) {
+function Mascot({ size = 96 }) {
   return (
     <div
-      className="relative flex items-center justify-center rounded-full shadow-xl shadow-primary/30 shrink-0"
-      style={{
-        width: size,
-        height: size,
-        background: 'linear-gradient(135deg, #6C63FF 0%, #a78bfa 50%, #ec4899 100%)',
-      }}
+      className="relative shrink-0"
+      style={{ width: size, height: size }}
       aria-hidden="true"
     >
-      {/* Outer glow ring */}
-      <div
-        className="absolute inset-0 rounded-full opacity-40 node-pulse"
-        style={{ background: 'inherit' }}
+      <Image
+        src="/vectorink-vectorizer-result.svg" // must exist under /public
+        alt=""
+        width={size}
+        height={size}
+        priority
+        draggable={false}
       />
-      <span style={{ fontSize: size * 0.42, position: 'relative', zIndex: 1 }}>🤖</span>
     </div>
   )
 }
 
-// ── Small avatar for chat bubbles ──────────────────────────────────────────
-function MiniAvatar() {
+
+function SmallMascot({ size = 50 }) {
   return (
     <div
-      className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 shadow-sm"
-      style={{ background: 'linear-gradient(135deg, #6C63FF, #a78bfa)' }}
+      className="relative shrink-0"
+      style={{ width: size, height: size }}
       aria-hidden="true"
     >
-      <span style={{ fontSize: 14 }}>🤖</span>
+      <Image
+        src="/vectorink-vectorizer-result.svg" // must exist under /public
+        alt=""
+        width={size}
+        height={size}
+        priority
+        draggable={false}
+      />
     </div>
   )
 }
@@ -63,7 +67,7 @@ const SUGGESTIONS = [
   'Vad är sannolikhet?',
 ]
 
-const GREETING = 'Hej! Jag är Mathew 👋\n\nJag är din personliga AI-matematiklärare för Matte 1b. Fråga mig vad som helst — jag förklarar, hjälper dig lösa problem och ger tips på hur du kan förbättra din förståelse.'
+const GREETING = 'Hej! Jag är Mathew. Jag är din personliga AI-matematiklärare för Matte 1b. Fråga mig vad som helst — jag förklarar, hjälper dig lösa problem och ger tips på hur du kan förbättra din förståelse.'
 
 export default function MathewPage() {
   const [messages, setMessages] = useState([])
@@ -123,7 +127,7 @@ export default function MathewPage() {
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 px-6 py-4 bg-white border-b border-border shrink-0">
-        <MascotPlaceholder size={40} />
+        <Mascot size={40} />
         <div className="flex-1">
           <h1 className="font-bold text-text text-lg leading-tight">Mathew</h1>
           <div className="flex items-center gap-1.5">
@@ -159,7 +163,7 @@ export default function MathewPage() {
               transition={{ duration: 0.35 }}
               className="flex flex-col items-center justify-center min-h-[60vh] px-6 py-12 text-center"
             >
-              <MascotPlaceholder size={100} />
+              <Mascot size={100} />
 
               <h2 className="mt-6 text-2xl font-bold text-text">Hej! Jag är Mathew</h2>
               <p className="mt-2 text-text-muted text-sm max-w-sm leading-relaxed">
@@ -193,7 +197,7 @@ export default function MathewPage() {
                 transition={{ duration: 0.2 }}
                 className={['flex gap-2.5', msg.role === 'user' ? 'flex-row-reverse' : ''].join(' ')}
               >
-                {msg.role === 'assistant' && <MiniAvatar />}
+                {msg.role === 'assistant' && <SmallMascot />}
 
                 <div
                   className={[
@@ -215,7 +219,7 @@ export default function MathewPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex gap-2.5 items-start"
               >
-                <MiniAvatar />
+                <SmallMascot />
                 <div className="bg-white border border-border rounded-2xl rounded-tl-sm shadow-sm">
                   <TypingDots />
                 </div>

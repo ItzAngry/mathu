@@ -1,11 +1,16 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { resolvePublicAudioUrl } from '@/lib/resolveAudioUrl'
 
 export default function TTSButton({ text, audioUrl, label = 'Lyssna' }) {
   const [playing, setPlaying] = useState(false)
   const audioRef = useRef(null)
   const utteranceRef = useRef(null)
+
+  const resolvedAudioUrl = resolvePublicAudioUrl(audioUrl)
+  const hasAudioFile = Boolean(resolvedAudioUrl)
+  const speechText = typeof text === 'string' ? text.trim() : ''
 
   function speak() {
     if (playing) {
@@ -13,9 +18,9 @@ export default function TTSButton({ text, audioUrl, label = 'Lyssna' }) {
       return
     }
 
-    // Prefer pre-recorded audio file
-    if (audioUrl) {
-      const audio = new Audio(audioUrl)
+    // Prefer pre-recorded audio file (full URL, /path, or public/ filename)
+    if (hasAudioFile) {
+      const audio = new Audio(resolvedAudioUrl)
       audioRef.current = audio
       audio.onended = () => setPlaying(false)
       audio.onerror = () => {
@@ -31,8 +36,8 @@ export default function TTSButton({ text, audioUrl, label = 'Lyssna' }) {
   }
 
   function useSpeechSynthesis() {
-    if (!window.speechSynthesis || !text) return
-    const utterance = new SpeechSynthesisUtterance(text)
+    if (!window.speechSynthesis || !speechText) return
+    const utterance = new SpeechSynthesisUtterance(speechText)
     utterance.lang = 'sv-SE'
     utterance.rate = 0.9
     utterance.onend = () => setPlaying(false)
@@ -55,7 +60,7 @@ export default function TTSButton({ text, audioUrl, label = 'Lyssna' }) {
     setPlaying(false)
   }
 
-  if (!text && !audioUrl) return null
+  if (!speechText && !hasAudioFile) return null
 
   return (
     <button

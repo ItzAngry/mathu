@@ -29,9 +29,14 @@ export default function AppProviders({ children, initialProfile }) {
     }
   }, [])
 
-  // Apply font preference to <html>
+  // Dyslexitypsnitt: sätt endast när aktivt (matchar CSS html[data-font="dyslexic"])
   useEffect(() => {
-    document.documentElement.setAttribute('data-font', settings.font)
+    const el = document.documentElement
+    if (settings.font === 'dyslexic') {
+      el.setAttribute('data-font', 'dyslexic')
+    } else {
+      el.removeAttribute('data-font')
+    }
   }, [settings.font])
 
   // Apply language to <html>

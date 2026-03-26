@@ -6,7 +6,7 @@ export default async function AdminTestsPage() {
 
   const [{ data: chapters }, { data: nodes }] = await Promise.all([
     supabase.from('chapters').select('*').order('order_index'),
-    supabase.from('nodes').select('*').order('order_index'),
+    supabase.from('nodes').select('*').order('chapter_id').order('order_index'),
   ])
 
   return (

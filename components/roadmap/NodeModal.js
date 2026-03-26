@@ -1,38 +1,23 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Button from '@/components/ui/Button'
-import QuestionSession from '@/components/questions/QuestionSession'
 import TTSButton from '@/components/ui/TTSButton'
+import { AppContext } from '@/components/providers/AppProviders'
+import { markdownToSpeechPlainText } from '@/lib/markdownPlainText'
+import { renderIntroMarkdownToHtml } from '@/lib/renderIntroMarkdown'
 import { updateNodeProgress } from '@/lib/actions/progress'
-
-function parseMarkdown(md) {
-  if (!md) return ''
-  return md
-    .replace(/^### (.+)$/gm, '<h3 class="text-base font-semibold mt-4 mb-2">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="text-lg font-semibold mt-5 mb-2">$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1 class="text-xl font-bold mt-4 mb-3">$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`(.+?)`/g, '<code class="bg-surface-2 px-1 py-0.5 rounded text-sm font-mono">$1</code>')
-    .replace(/^\| (.+) \|$/gm, (_, row) => {
-      const cells = row.split(' | ').map((c) => `<td class="border border-border px-3 py-2">${c}</td>`).join('')
-      return `<tr>${cells}</tr>`
-    })
-    .replace(/(<tr>.*<\/tr>\n)+/gs, (tbl) => `<table class="w-full border-collapse my-3 text-sm">${tbl}</table>`)
-    .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc mb-1">$1</li>')
-    .replace(/(<li.*<\/li>\n)+/gs, (list) => `<ul class="my-2">${list}</ul>`)
-    .replace(/\n\n/g, '</p><p class="mb-2">')
-    .replace(/^(?!<[hultpc])(.+)$/gm, '<p class="mb-2">$1</p>')
-}
+import 'katex/dist/katex.min.css'
 
 export default function NodeModal({ node, progress, onClose }) {
   const overlayRef = useRef(null)
   const [showQuestions, setShowQuestions] = useState(false)
   const [completing, setCompleting] = useState(false)
   const router = useRouter()
+  const app = useContext(AppContext)
+  const ttsEnabled = app?.settings?.tts ?? false
 
   async function handleIntroComplete() {
     setCompleting(true)
@@ -71,14 +56,15 @@ export default function NodeModal({ node, progress, onClose }) {
 
   const isIntro = node.type === 'intro'
   const isPractice = node.type === 'practice' || node.type === 'test'
-
-  if (showQuestions && isPractice) {
-    return <QuestionSession node={node} onClose={onClose} />
-  }
+  const introSpeechText = isIntro ? markdownToSpeechPlainText(node.content_md) : ''
+  const hasIntroAudio = Boolean(node.audio_url)
+  const showIntroListen = isIntro && (hasIntroAudio || (ttsEnabled && introSpeechText.length > 0))
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className={['fixed inset-0 z-50 flex items-center justify-center', isIntro ? 'p-2 sm:p-4 md:p-6' : 'p-4'].join(
+        ' '
+      )}
       role="dialog"
       aria-modal="true"
       aria-labelledby="node-modal-title"
@@ -95,28 +81,44 @@ export default function NodeModal({ node, progress, onClose }) {
       {/* Modal */}
       <motion.div
         ref={overlayRef}
-        className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col"
+        className={[
+          'relative bg-white rounded-3xl shadow-2xl w-full overflow-hidden flex flex-col',
+          isIntro ? 'max-w-7xl max-h-[96vh]' : 'max-w-xl max-h-[90vh]',
+        ].join(' ')}
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       >
         {/* Header */}
-        <div className="flex items-start gap-3 p-6 pb-4 border-b border-border">
-          <div className="text-3xl" aria-hidden="true">
+        <div
+          className={[
+            'flex items-start gap-3 border-b border-border',
+            isIntro ? 'p-6 sm:p-8 pb-4 sm:pb-5' : 'p-6 pb-4',
+          ].join(' ')}
+        >
+          <div className={isIntro ? 'text-4xl' : 'text-3xl'} aria-hidden="true">
             {node.type === 'intro' ? '📖' : node.type === 'practice' ? '✏️' : '🏆'}
           </div>
           <div className="flex-1">
-            <h2 id="node-modal-title" className="text-xl font-bold text-text">
+            <h2
+              id="node-modal-title"
+              className={['font-bold text-text leading-tight', isIntro ? 'text-3xl sm:text-4xl' : 'text-2xl'].join(' ')}
+            >
               {node.title}
             </h2>
-            <p className="text-sm text-text-muted capitalize">
+            <p className={['text-text-muted capitalize', isIntro ? 'text-base mt-1' : 'text-sm'].join(' ')}>
               {node.type === 'intro' ? 'Läsavsnitt' : node.type === 'practice' ? 'Övningar' : 'Delprov'}
               {progress?.completed && ' · ✓ Klart'}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {node.audio_url && <TTSButton text={node.content_md} audioUrl={node.audio_url} />}
+            {node.audio_url && !isIntro && (
+              <TTSButton
+                text={markdownToSpeechPlainText(node.content_md)}
+                audioUrl={node.audio_url}
+              />
+            )}
             <button
               onClick={onClose}
               aria-label="Stäng"
@@ -130,12 +132,36 @@ export default function NodeModal({ node, progress, onClose }) {
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div
+          className={[
+            'flex-1 overflow-y-auto min-h-0',
+            isIntro ? 'px-5 sm:px-12 lg:px-16 py-7 sm:py-10' : 'px-6 py-6',
+          ].join(' ')}
+        >
           {isIntro && node.content_md ? (
-            <div
-              className="prose-mathu"
-              dangerouslySetInnerHTML={{ __html: parseMarkdown(node.content_md) }}
-            />
+            <>
+              {showIntroListen && (
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-5 sm:p-6 rounded-2xl bg-primary-light border border-primary/25 mb-6 sm:mb-8">
+                  <div className="min-w-0">
+                    <p className="text-base font-semibold text-text">Lyssna på läsavsnittet</p>
+                    <p className="text-sm text-text-muted mt-1 leading-relaxed">
+                      {hasIntroAudio
+                        ? 'Uppläsning från inspelad ljudfil.'
+                        : 'Text läses upp med webbläsarens röst (Inställningar).'}
+                    </p>
+                  </div>
+                  <TTSButton
+                    text={introSpeechText}
+                    audioUrl={node.audio_url}
+                    label="Lyssna"
+                  />
+                </div>
+              )}
+              <div
+                className="prose-mathu prose-mathu--reading"
+                dangerouslySetInnerHTML={{ __html: renderIntroMarkdownToHtml(node.content_md) }}
+              />
+            </>
           ) : isPractice ? (
             <div className="text-center py-4">
               <div className="text-5xl mb-4" aria-hidden="true">
@@ -159,13 +185,16 @@ export default function NodeModal({ node, progress, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="p-6 pt-4 border-t border-border">
+        <div className={['border-t border-border', isIntro ? 'p-6 sm:p-8 pt-4 sm:pt-5' : 'p-6 pt-4'].join(' ')}>
           {isPractice && (
             <Button
               variant="primary"
               size="lg"
               fullWidth
-              onClick={() => setShowQuestions(true)}
+              onClick={() => {
+                router.push(`/plugga/node/${node.id}/questions`)
+                onClose()
+              }}
             >
               {progress?.completed ? 'Öva igen' : node.type === 'test' ? 'Starta delprov' : 'Börja övningar'}
             </Button>

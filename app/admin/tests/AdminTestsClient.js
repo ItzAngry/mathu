@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Button from '@/components/ui/Button'
+import ContentMdTextarea from '@/components/admin/ContentMdTextarea'
 import { upsertNode, deleteNode } from '@/lib/actions/admin'
 
 const TYPE_LABELS = { intro: 'Läsavsnitt', practice: 'Övningar', test: 'Delprov' }
@@ -10,7 +11,7 @@ const SIZE_LABELS = { small: 'Liten', medium: 'Medium', large: 'Stor' }
 
 const EMPTY_NODE = {
   id: null, chapter_id: '', type: 'practice', title: '', title_en: '',
-  content_md: '', order_index: 0, size: 'medium', is_published: true,
+  content_md: '', audio_url: '', order_index: 0, size: 'medium', is_published: true,
 }
 
 export default function AdminTestsClient({ chapters, nodes: initialNodes }) {
@@ -69,7 +70,7 @@ export default function AdminTestsClient({ chapters, nodes: initialNodes }) {
               <th className="text-left px-4 py-3 font-semibold text-text-muted">Typ</th>
               <th className="text-left px-4 py-3 font-semibold text-text-muted">Storlek</th>
               <th className="text-left px-4 py-3 font-semibold text-text-muted">Kapitel</th>
-              <th className="text-left px-4 py-3 font-semibold text-text-muted">#</th>
+              <th className="text-left px-4 py-3 font-semibold text-text-muted">Ordning</th>
               <th className="text-left px-4 py-3 font-semibold text-text-muted">Pub.</th>
               <th className="px-4 py-3" />
             </tr>
@@ -116,8 +117,12 @@ export default function AdminTestsClient({ chapters, nodes: initialNodes }) {
                   <button onClick={() => setEditing(null)} className="text-text-muted hover:text-text">✕</button>
                 </div>
 
-                <form onSubmit={handleSave} className="space-y-4">
-                  {editing.id && <input type="hidden" name="id" value={editing.id} />}
+                <form
+                  key={editing.id ?? 'new-node'}
+                  onSubmit={handleSave}
+                  className="space-y-4"
+                >
+                  {editing.id ? <input type="hidden" name="id" defaultValue={editing.id} /> : null}
 
                   <div>
                     <label className="block text-sm font-medium text-text mb-1">Titel *</label>
@@ -176,8 +181,32 @@ export default function AdminTestsClient({ chapters, nodes: initialNodes }) {
 
                   <div>
                     <label className="block text-sm font-medium text-text mb-1">Innehåll (Markdown, för läsavsnitt)</label>
-                    <textarea name="content_md" defaultValue={editing.content_md} rows={6}
-                      className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none font-mono" />
+                    <ContentMdTextarea
+                      name="content_md"
+                      defaultValue={editing.content_md}
+                      rows={10}
+                      className="px-4 py-2.5"
+                      placeholder="| Kolumn A | Kolumn B | eller klistra tabell från Excel/Word."
+                    />
+                    <p className="text-xs text-text-muted mt-1 leading-relaxed">
+                      Tabeller från Excel (tabbar) eller Word/HTML stöds. Block med kolumner utan tabbar:{' '}
+                      <code className="bg-surface-2 px-1 rounded text-[11px]">:::table3</code> …{' '}
+                      <code className="bg-surface-2 px-1 rounded text-[11px]">:::</code>
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-text mb-1">Ljudfil för uppläsning (URL)</label>
+                    <input
+                      type="text"
+                      name="audio_url"
+                      defaultValue={editing.audio_url ?? ''}
+                      placeholder="https://…"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <p className="text-xs text-text-muted mt-1">
+                      Filnamn under public (t.ex. audio/lesson.mp3) eller full https-URL.
+                    </p>
                   </div>
 
                   <div className="flex gap-3">

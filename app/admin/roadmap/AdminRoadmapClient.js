@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Button from '@/components/ui/Button'
+import ContentMdTextarea from '@/components/admin/ContentMdTextarea'
 import { upsertNode, deleteNode, upsertQuestion, deleteQuestion } from '@/lib/actions/admin'
 
 // ── Type config ────────────────────────────────────────────────────────────
@@ -168,11 +169,42 @@ function NodeForm({ node, onSave, onCancel }) {
         <label className="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1.5">
           Innehåll (Markdown)
         </label>
-        <textarea
-          name="content_md" defaultValue={node.content_md} rows={6}
-          placeholder="## Rubrik&#10;&#10;Brödtext här..."
-          className="w-full px-3 py-2.5 rounded-xl border border-border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+        <ContentMdTextarea
+          name="content_md"
+          defaultValue={node.content_md}
+          rows={10}
+          placeholder={'## Rubrik\n\nBrödtext…\n\n| Kolumn A | Kolumn B |\n| --- | --- |\n| 1 | 2 |\n\nKlistra in tabell från Excel (tabbar) eller Word/HTML.'}
         />
+        <p className="text-xs text-text-muted mt-1.5 leading-relaxed">
+          Tabeller: klistra från Excel eller Word (HTML-tabell blir automatiskt till rader med{' '}
+          <code className="text-[11px] bg-surface-2 px-1 rounded">|</code>
+          ), eller skriv Markdown med{' '}
+          <code className="text-[11px] bg-surface-2 px-1 rounded">| k1 | k2 |</code> och valfri rad{' '}
+          <code className="text-[11px] bg-surface-2 px-1 rounded">| --- | --- |</code>. För text som
+          ligger i kolumner utan tabbar, använd block:{' '}
+          <code className="text-[11px] bg-surface-2 px-1 rounded">:::table3</code> …{' '}
+          <code className="text-[11px] bg-surface-2 px-1 rounded">:::</code> (siffran = antal kolumner,
+          sedan celler rad för rad).
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1.5">
+          Ljudfil för uppläsning (URL)
+        </label>
+        <input
+          type="text"
+          name="audio_url"
+          defaultValue={node.audio_url ?? ''}
+          placeholder="https://… (mp3 eller annan ljud-URL)"
+          className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+        <p className="text-xs text-text-muted mt-1.5">
+          Fil i mappen <code className="text-[11px] bg-surface-2 px-1 rounded">public</code>
+          : skriv t.ex. <code className="text-[11px] bg-surface-2 px-1 rounded">audio/min-lektion.mp3</code>
+          (filen ligger då i <code className="text-[11px] bg-surface-2 px-1 rounded">public/audio/</code>
+          ). Du kan också klistra in en fullständig https-URL. Lämna tom för enbart text-tal under Inställningar.
+        </p>
       </div>
 
       <label className="flex items-center gap-2.5 text-sm cursor-pointer select-none">
