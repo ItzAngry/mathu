@@ -207,13 +207,13 @@ export default function Sidebar({ profile }) {
         >
           <div
             className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm shrink-0"
-            title={profile?.display_name ?? 'Användare'}
+            title={profile?.display_name?.trim() || 'Användare'}
           >
-            {(profile?.display_name ?? 'U')[0].toUpperCase()}
+            {(profile?.display_name?.trim()?.[0] ?? 'U').toUpperCase()}
           </div>
           {!sidebarCollapsed && (
             <span className="text-sm text-text-muted font-medium truncate">
-              {profile?.display_name ?? 'Användare'}
+              {profile?.display_name?.trim() || 'Användare'}
             </span>
           )}
         </div>
