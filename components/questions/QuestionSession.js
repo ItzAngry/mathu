@@ -32,11 +32,14 @@ export default function QuestionSession({
   }, [node.id])
 
   function handleAnswer(correct) {
-    const newResults = [...results, { questionId: questions[currentIdx]?.id, correct }]
+    const q = questions[currentIdx]
+    const newResults = [...results, { questionId: q?.id, correct, points: q?.points ?? 1 }]
     setResults(newResults)
 
     if (currentIdx + 1 >= questions.length) {
-      const score = (newResults.filter((r) => r.correct).length / newResults.length) * 100
+      const earnedPoints = newResults.filter((r) => r.correct).reduce((s, r) => s + r.points, 0)
+      const totalPoints = newResults.reduce((s, r) => s + r.points, 0)
+      const score = totalPoints > 0 ? (earnedPoints / totalPoints) * 100 : 0
       updateNodeProgress({ nodeId: node.id, completed: true, score }).then(() => router.refresh())
       setFinished(true)
     } else {
@@ -44,9 +47,9 @@ export default function QuestionSession({
     }
   }
 
-  const score = results.length > 0
-    ? Math.round((results.filter((r) => r.correct).length / results.length) * 100)
-    : 0
+  const earnedPoints = results.filter((r) => r.correct).reduce((s, r) => s + r.points, 0)
+  const fullTotalPoints = questions.reduce((s, q) => s + (q.points ?? 1), 0)
+  const score = fullTotalPoints > 0 ? Math.round((earnedPoints / fullTotalPoints) * 100) : 0
 
   const activeQuestion =
     !finished && questions.length > 0 ? questions[currentIdx] : null
@@ -85,7 +88,7 @@ export default function QuestionSession({
         className={
           isPage
             ? 'flex flex-col flex-1 min-h-0 w-full max-w-[1600px] mx-auto overflow-hidden border-0 shadow-none'
-            : 'flex flex-col flex-1 min-h-0 m-0 sm:m-3 md:m-4 bg-white sm:rounded-3xl shadow-2xl border border-border overflow-hidden max-w-[1600px] w-full mx-auto'
+            : 'flex flex-col flex-1 min-h-0 m-0 sm:m-3 md:m-4 bg-white sm:rounded-3xl shadow-2xl border border-border overflow-hidden max-w-[1600px] mx-auto self-stretch'
         }
         initial={{ opacity: 0, y: isPage ? 0 : 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -146,13 +149,33 @@ export default function QuestionSession({
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col items-center justify-center gap-4 py-12 px-6 text-center flex-1 overflow-y-auto"
               >
-                <div className="text-6xl" role="img" aria-label={score >= 70 ? 'Bra jobbat' : 'Försök igen'}>
-                  {score >= 90 ? '🏆' : score >= 70 ? '⭐' : score >= 50 ? '💪' : '📚'}
+                <div
+                  className={[
+                    'w-20 h-20 rounded-full flex items-center justify-center',
+                    score >= 80 ? 'bg-success/15' : score >= 50 ? 'bg-primary-light' : 'bg-surface-2',
+                  ].join(' ')}
+                  aria-hidden="true"
+                >
+                  {score >= 80 ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-10 h-10 text-success">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                    </svg>
+                  ) : score >= 50 ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-10 h-10 text-primary">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-10 h-10 text-text-muted">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                    </svg>
+                  )}
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-text">{score}%</p>
-                  <p className="text-text-muted text-sm mt-1">
-                    {results.filter((r) => r.correct).length} av {results.length} rätt
+                  <p className="text-3xl font-bold text-text tabular-nums">
+                    {earnedPoints} <span className="text-text-muted font-normal text-xl">/ {fullTotalPoints} poäng</span>
+                  </p>
+                  <p className="text-text-muted text-sm mt-1.5">
+                    {results.filter((r) => r.correct).length} av {results.length} rätt · {score}%
                   </p>
                 </div>
                 <p className="text-text-muted text-sm max-w-md">
@@ -163,7 +186,7 @@ export default function QuestionSession({
                       : 'Öva mer på detta avsnitt och försök igen.'}
                 </p>
                 <Button variant="primary" size="lg" onClick={onClose}>
-                  Tillbaka till kursen
+                  Tillbaka
                 </Button>
               </motion.div>
             ) : questions.length === 0 ? (

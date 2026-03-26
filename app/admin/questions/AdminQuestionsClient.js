@@ -196,6 +196,7 @@ export default function AdminQuestionsClient({ chapters, nodes, questions: initi
                 <th className="text-left px-5 py-3 font-semibold text-text-muted text-xs uppercase tracking-wide">Fråga</th>
                 <th className="text-left px-4 py-3 font-semibold text-text-muted text-xs uppercase tracking-wide">Svar</th>
                 <th className="text-left px-4 py-3 font-semibold text-text-muted text-xs uppercase tracking-wide">Betyg</th>
+                <th className="text-left px-4 py-3 font-semibold text-text-muted text-xs uppercase tracking-wide">Poäng</th>
                 <th className="text-left px-4 py-3 font-semibold text-text-muted text-xs uppercase tracking-wide">Kapitel / Nod</th>
                 <th className="px-4 py-3 w-24" />
               </tr>
@@ -230,6 +231,9 @@ export default function AdminQuestionsClient({ chapters, nodes, questions: initi
                       ) : (
                         <span className="text-text-muted">—</span>
                       )}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-text-muted tabular-nums">
+                      {q.points ?? 1}p
                     </td>
                     <td className="px-4 py-3.5 text-xs text-text-muted">
                       <span>{chapterMap[q.chapter_id]?.title ?? '—'}</span>
@@ -301,8 +305,8 @@ export default function AdminQuestionsClient({ chapters, nodes, questions: initi
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-2">
                     <label className="block text-sm font-medium text-text mb-1.5">Rätt svar <span className="text-danger">*</span></label>
                     <input
                       type="text"
@@ -313,15 +317,26 @@ export default function AdminQuestionsClient({ chapters, nodes, questions: initi
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-text mb-1.5">Betygsnivå</label>
-                    <select
-                      name="grade_level"
-                      defaultValue={editing.grade_level}
-                      className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      {['E', 'C', 'A'].map((g) => <option key={g} value={g}>{g}</option>)}
-                    </select>
+                    <label className="block text-sm font-medium text-text mb-1.5">Poäng</label>
+                    <input
+                      type="number"
+                      name="points"
+                      defaultValue={editing.points ?? 1}
+                      min={1}
+                      className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                    />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-text mb-1.5">Betygsnivå</label>
+                  <select
+                    name="grade_level"
+                    defaultValue={editing.grade_level}
+                    className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    {['E', 'C', 'A'].map((g) => <option key={g} value={g}>{g}</option>)}
+                  </select>
                 </div>
 
                 <div>

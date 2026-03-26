@@ -298,14 +298,26 @@ function QuestionModal({ question, nodeId, onClose }) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-text mb-1.5">Ordning</label>
-            <input
-              type="number"
-              name="order_index"
-              defaultValue={q.order_index ?? 0}
-              className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-text mb-1.5">Poäng</label>
+              <input
+                type="number"
+                name="points"
+                defaultValue={q.points ?? 1}
+                min={1}
+                className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text mb-1.5">Ordning</label>
+              <input
+                type="number"
+                name="order_index"
+                defaultValue={q.order_index ?? 0}
+                className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
           </div>
 
           <label className="flex items-center gap-3 cursor-pointer select-none p-3 rounded-xl border border-border hover:bg-surface transition-colors">
@@ -335,13 +347,14 @@ function QuestionModal({ question, nodeId, onClose }) {
 
 // ─── Exam Card ────────────────────────────────────────────────────────────────
 
-function ExamCard({ exam, questions, chapters, onEditExam }) {
+function ExamCard({ exam, questions, chapters, onEditExam, onDeleteExam }) {
   const [open, setOpen] = useState(false)
   const [addingQuestion, setAddingQuestion] = useState(false)
   const [editingQuestion, setEditingQuestion] = useState(null)
   const [localQuestions, setLocalQuestions] = useState(questions)
 
   const questionCount = localQuestions.length
+  const totalPoints = localQuestions.reduce((sum, q) => sum + (q.points ?? 1), 0)
 
   async function handleDeleteQuestion(id) {
     if (!confirm('Ta bort denna fråga?')) return
@@ -370,7 +383,7 @@ function ExamCard({ exam, questions, chapters, onEditExam }) {
             )}
           </div>
           <p className="text-xs text-text-muted mt-0.5">
-            {questionCount} {questionCount === 1 ? 'fråga' : 'frågor'}
+            {questionCount} {questionCount === 1 ? 'fråga' : 'frågor'} · {totalPoints} {totalPoints === 1 ? 'poäng' : 'poäng'} totalt
           </p>
         </div>
 
@@ -382,6 +395,13 @@ function ExamCard({ exam, questions, chapters, onEditExam }) {
           >
             <EditIcon />
             Redigera
+          </button>
+          <button
+            onClick={() => onDeleteExam(exam.id)}
+            className="p-1.5 rounded-xl text-danger hover:bg-danger/10 transition-colors focus-visible:outline-2 focus-visible:outline-danger"
+            aria-label={`Ta bort: ${exam.title}`}
+          >
+            <TrashIcon />
           </button>
           <button
             onClick={() => setOpen((v) => !v)}
@@ -418,6 +438,7 @@ function ExamCard({ exam, questions, chapters, onEditExam }) {
                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-text-muted uppercase tracking-wide">Fråga</th>
                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-text-muted uppercase tracking-wide">Svar</th>
                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-text-muted uppercase tracking-wide">Betyg</th>
+                      <th className="text-left px-4 py-2.5 text-xs font-semibold text-text-muted uppercase tracking-wide">Poäng</th>
                       <th className="px-4 py-2.5 w-24" />
                     </tr>
                   </thead>
@@ -441,6 +462,7 @@ function ExamCard({ exam, questions, chapters, onEditExam }) {
                               </span>
                             ) : '—'}
                           </td>
+                          <td className="px-4 py-3 text-xs text-text-muted tabular-nums">{q.points ?? 1}p</td>
                           <td className="px-4 py-3">
                             <div className="flex gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
@@ -567,23 +589,14 @@ export default function NationalExamsClient({ examNodes, questionsByNode, chapte
               <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3">{yr}</h2>
               <div className="flex flex-col gap-3">
                 {byYear[yr].map((exam) => (
-                  <div key={exam.id} className="relative group">
-                    <ExamCard
-                      exam={exam}
-                      questions={questionsByNode[exam.id] ?? []}
-                      chapters={chapters}
-                      onEditExam={setEditingExam}
-                    />
-                    {/* Delete exam button - always accessible */}
-                    <button
-                      onClick={() => handleDeleteExam(exam.id)}
-                      className="absolute top-4 right-[140px] flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium text-danger hover:bg-danger/10 transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-danger"
-                      aria-label={`Ta bort: ${exam.title}`}
-                    >
-                      <TrashIcon />
-                      Ta bort
-                    </button>
-                  </div>
+                  <ExamCard
+                    key={exam.id}
+                    exam={exam}
+                    questions={questionsByNode[exam.id] ?? []}
+                    chapters={chapters}
+                    onEditExam={setEditingExam}
+                    onDeleteExam={handleDeleteExam}
+                  />
                 ))}
               </div>
             </section>
