@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import RoadmapNode from './RoadmapNode'
 import RoadmapConnector from './RoadmapConnector'
@@ -23,20 +23,59 @@ export default function RoadmapChapter({ chapter, nodes, progressMap, chapterInd
 
   const completedCount = nodes.filter((n) => progressMap[n.id]?.completed).length
 
-  // Zigzag layout: alternate left/right for visual interest
+  // Zigzag positions (applied to each node)
   const positions = ['center', 'right', 'center', 'left', 'center']
 
   return (
-    <div className="mb-12">
-      {/* Chapter header */}
+    <div className="mb-4">
+      {/* ── Nodes — flex-col-reverse so node[0] is at visual bottom ─────── */}
+      <div className="flex flex-col-reverse items-center px-6">
+        {nodes.map((node, idx) => {
+          const pos = positions[idx % positions.length]
+          const active = isNodeActive(idx)
+          const prog = progressMap[node.id]
+
+          return (
+            <Fragment key={node.id}>
+              {/* Connector above this node (towards next node upward) */}
+              {idx < nodes.length - 1 && (
+                <div className="flex justify-center w-full">
+                  <RoadmapConnector completed={prog?.completed} />
+                </div>
+              )}
+
+              {/* Node — offset left/center/right */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: chapterIndex * 0.1 + idx * 0.08, type: 'spring', stiffness: 200 }}
+                className={[
+                  'flex w-full',
+                  pos === 'left'  ? 'justify-start pl-10' :
+                  pos === 'right' ? 'justify-end pr-10'   : 'justify-center',
+                ].join(' ')}
+              >
+                <RoadmapNode
+                  node={node}
+                  progress={prog}
+                  isActive={active}
+                  onClick={() => setActiveNode(node)}
+                />
+              </motion.div>
+            </Fragment>
+          )
+        })}
+      </div>
+
+      {/* ── Chapter header — sits below the nodes (user sees this first when scrolling up) */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: chapterIndex * 0.1 }}
-        className="flex items-center gap-3 mb-8 px-6"
+        className="flex items-center gap-3 mt-6 mb-2 px-6"
       >
         <div
-          className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl shadow-sm"
+          className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl shadow-sm shrink-0"
           style={{ backgroundColor: chapter.color + '22', color: chapter.color }}
           aria-hidden="true"
         >
@@ -60,38 +99,8 @@ export default function RoadmapChapter({ chapter, nodes, progressMap, chapterInd
         </div>
       </motion.div>
 
-      {/* Nodes in zigzag pattern */}
-      <div className="flex flex-col items-center gap-0 px-6">
-        {nodes.map((node, idx) => {
-          const pos = positions[idx % positions.length]
-          const active = isNodeActive(idx)
-          const prog = progressMap[node.id]
-
-          return (
-            <motion.div
-              key={node.id}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: chapterIndex * 0.1 + idx * 0.08, type: 'spring', stiffness: 200 }}
-              className={[
-                'flex flex-col items-center w-full',
-                pos === 'left' && 'items-start pl-12',
-                pos === 'right' && 'items-end pr-12',
-              ].filter(Boolean).join(' ')}
-            >
-              <RoadmapNode
-                node={node}
-                progress={prog}
-                isActive={active}
-                onClick={() => setActiveNode(node)}
-              />
-              {idx < nodes.length - 1 && (
-                <RoadmapConnector completed={prog?.completed} />
-              )}
-            </motion.div>
-          )
-        })}
-      </div>
+      {/* Divider between chapters */}
+      <div className="mx-6 border-t border-border/60 mt-4" aria-hidden="true" />
 
       {/* Node modal */}
       <AnimatePresence>

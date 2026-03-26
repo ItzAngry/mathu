@@ -95,6 +95,35 @@ export default function SettingsPage() {
               <input type="hidden" name="font_preference" value={settings.font} />
             </div>
 
+            {/* Dark mode */}
+            <div className="mb-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-text">{t.settings.darkMode}</p>
+                  <p className="text-xs text-text-muted mt-0.5">{t.settings.darkModeDescription}</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={settings.darkMode}
+                  onClick={() => updateSettings({ darkMode: !settings.darkMode })}
+                  className={[
+                    'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-primary',
+                    settings.darkMode ? 'bg-primary' : 'bg-border',
+                  ].join(' ')}
+                  aria-label={t.settings.darkMode}
+                >
+                  <span
+                    className={[
+                      'inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform',
+                      settings.darkMode ? 'translate-x-6' : 'translate-x-1',
+                    ].join(' ')}
+                  />
+                </button>
+              </div>
+              <input type="hidden" name="dark_mode" value={String(settings.darkMode)} />
+            </div>
+
             {/* TTS */}
             <div>
               <div className="flex items-center justify-between">

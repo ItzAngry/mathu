@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { updateNodeProgress } from '@/lib/actions/progress'
 import AnswerChecker from './AnswerChecker'
@@ -9,6 +10,7 @@ import TTSButton from '@/components/ui/TTSButton'
 import Button from '@/components/ui/Button'
 
 export default function QuestionSession({ node, onClose }) {
+  const router = useRouter()
   const [questions, setQuestions] = useState([])
   const [currentIdx, setCurrentIdx] = useState(0)
   const [results, setResults] = useState([])
@@ -31,7 +33,7 @@ export default function QuestionSession({ node, onClose }) {
 
     if (currentIdx + 1 >= questions.length) {
       const score = (newResults.filter((r) => r.correct).length / newResults.length) * 100
-      updateNodeProgress({ nodeId: node.id, completed: true, score })
+      updateNodeProgress({ nodeId: node.id, completed: true, score }).then(() => router.refresh())
       setFinished(true)
     } else {
       setCurrentIdx((i) => i + 1)

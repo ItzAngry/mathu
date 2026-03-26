@@ -3,7 +3,10 @@
     "allow": [
       "Bash(npm install:*)",
       "mcp__Claude_Preview__preview_start",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\elias.abdulahad\\\\Desktop\\\\mathu\\\\supabase\\\\migrations\")",
+      "Bash(Out-Null)",
+      "Bash(Write-Host \"done\")"
     ]
   }
 }

@@ -119,24 +119,74 @@ body {
 }
 
 /* ============================================================
+   Dark mode — set data-theme="dark" on <html>
+   Overrides Tailwind v4 @theme tokens (CSS custom properties).
+   ============================================================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+
+  /* Override Tailwind @theme tokens */
+  --color-surface: #1e293b;
+  --color-surface-2: #273549;
+  --color-border: #334155;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-primary-light: #2d2b60;
+  --color-success-light: #14532d;
+}
+
+[data-theme="dark"] body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Cards and panels that use bg-white */
+[data-theme="dark"] .bg-white {
+  background-color: #1e293b !important;
+}
+
+/* Input fields */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background-color: #273549;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Dark scrollbar */
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* ============================================================
    Markdown content styling
    ============================================================ */
 .prose-mathu h1 {
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  color: #111827;
+  color: var(--color-text);
 }
 .prose-mathu h2 {
   font-size: 1.25rem;
   font-weight: 600;
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
-  color: #111827;
+  color: var(--color-text);
 }
 .prose-mathu p {
   margin-bottom: 1rem;
-  color: #374151;
+  color: var(--color-text-muted);
   line-height: 1.8;
 }
 .prose-mathu ul, .prose-mathu ol {
@@ -151,16 +201,16 @@ body {
   margin-bottom: 1rem;
 }
 .prose-mathu th, .prose-mathu td {
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--color-border);
   padding: 0.5rem 0.75rem;
   text-align: left;
 }
 .prose-mathu th {
-  background: #F3F4F6;
+  background: var(--color-surface-2);
   font-weight: 600;
 }
 .prose-mathu code {
-  background: #F3F4F6;
+  background: var(--color-surface-2);
   padding: 0.15rem 0.35rem;
   border-radius: 4px;
   font-family: var(--font-mono);

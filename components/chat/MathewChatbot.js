@@ -15,7 +15,7 @@ function MathewAvatar({ size = 48, pulsing = false }) {
   )
 }
 
-const GREETING = 'Hej! Jag är Mathew, din AI-matematiklärare. Hur kan jag hjälpa dig idag? 😊'
+const GREETING = 'Hej! Jag är Mathew, din AI-matematiklärare. Hur kan jag hjälpa dig idag?'
 
 export default function MathewChatbot() {
   const [open, setOpen] = useState(false)

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabaseServer'
 import { redirect } from 'next/navigation'
 import ProgressBar from '@/components/layout/ProgressBar'
 import RoadmapChapter from '@/components/roadmap/RoadmapChapter'
-import MathewChatbot from '@/components/chat/MathewChatbot'
+import RoadmapScroller from '@/components/roadmap/RoadmapScroller'
 
 export const metadata = { title: 'Plugga' }
 
@@ -46,7 +46,7 @@ export default async function PluggaPage() {
   const totalNodes = nodes?.length ?? 0
   const completedNodes = Object.values(progressMap).filter((p) => p.completed).length
 
-  // Check if previous chapter is complete
+  // Check if previous chapter is complete (uses original chapter order)
   function isPrevChapterComplete(chapterIdx) {
     if (chapterIdx === 0) return true
     const prevChapter = chapters[chapterIdx - 1]
@@ -56,11 +56,20 @@ export default async function PluggaPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Progress bar */}
-      <ProgressBar completed={completedNodes} total={totalNodes} label="Din framgång i Matte1b" />
+      {/* Progress bar — sticky at top */}
+      <div className="sticky top-0 z-30 bg-surface/95 backdrop-blur-sm border-b border-border">
+        <ProgressBar completed={completedNodes} total={totalNodes} label="Din framgång i Matte1b" />
+      </div>
 
-      {/* Roadmap */}
-      <div className="flex-1 overflow-y-auto py-8 max-w-2xl mx-auto w-full">
+      {/* Roadmap — flex-col-reverse so chapter 1 renders at bottom */}
+      <div className="flex flex-col-reverse py-10 max-w-2xl mx-auto w-full px-2">
+        {/* Summit marker at the very top */}
+        <div className="flex flex-col items-center gap-2 pt-6 pb-2">
+          <div className="text-4xl" aria-hidden="true">🏔️</div>
+          <p className="text-xs font-semibold text-text-muted uppercase tracking-widest">Toppen</p>
+        </div>
+
+        {/* Chapters in original DOM order; flex-col-reverse makes ch1 appear at bottom */}
         {chapters?.map((chapter, idx) => (
           <RoadmapChapter
             key={chapter.id}
@@ -72,6 +81,12 @@ export default async function PluggaPage() {
           />
         ))}
 
+        {/* Base / start marker at the visual bottom */}
+        <div className="flex flex-col items-center gap-2 pb-6 pt-2">
+          <p className="text-xs font-semibold text-text-muted uppercase tracking-widest">Start</p>
+          <div className="text-3xl" aria-hidden="true">🚀</div>
+        </div>
+
         {(!chapters || chapters.length === 0) && (
           <div className="text-center py-20 text-text-muted">
             <div className="text-5xl mb-4">📚</div>
@@ -80,8 +95,8 @@ export default async function PluggaPage() {
         )}
       </div>
 
-      {/* Mathew chatbot */}
-      <MathewChatbot />
+      {/* Scroll to bottom on mount so user starts at chapter 1 */}
+      <RoadmapScroller />
     </div>
   )
 }

@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Button from '@/components/ui/Button'
 import QuestionSession from '@/components/questions/QuestionSession'
 import TTSButton from '@/components/ui/TTSButton'
+import { updateNodeProgress } from '@/lib/actions/progress'
 
 function parseMarkdown(md) {
   if (!md) return ''
@@ -29,6 +31,15 @@ function parseMarkdown(md) {
 export default function NodeModal({ node, progress, onClose }) {
   const overlayRef = useRef(null)
   const [showQuestions, setShowQuestions] = useState(false)
+  const [completing, setCompleting] = useState(false)
+  const router = useRouter()
+
+  async function handleIntroComplete() {
+    setCompleting(true)
+    await updateNodeProgress({ nodeId: node.id, completed: true, score: 100 })
+    router.refresh()
+    onClose()
+  }
 
   // Focus trap + Escape key
   useEffect(() => {
@@ -160,8 +171,14 @@ export default function NodeModal({ node, progress, onClose }) {
             </Button>
           )}
           {isIntro && (
-            <Button variant="primary" size="lg" fullWidth onClick={onClose}>
-              Klar med läsningen ✓
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth
+              onClick={handleIntroComplete}
+              disabled={completing}
+            >
+              {completing ? 'Sparar...' : progress?.completed ? 'Stäng' : 'Klar med läsningen ✓'}
             </Button>
           )}
         </div>
