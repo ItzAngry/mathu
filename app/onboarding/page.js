@@ -5,11 +5,9 @@ import { saveGradeGoal } from '@/lib/actions/onboarding'
 import Button from '@/components/ui/Button'
 
 const GRADES = [
-  { value: 'E', label: 'Betyg E', desc: 'Grundläggande kunskaper', color: '#6B7280', emoji: '🌱' },
-  { value: 'D', label: 'Betyg D', desc: 'Goda grundläggande kunskaper', color: '#3B82F6', emoji: '📘' },
-  { value: 'C', label: 'Betyg C', desc: 'Goda kunskaper', color: '#8B5CF6', emoji: '⭐' },
-  { value: 'B', label: 'Betyg B', desc: 'Mycket goda kunskaper', color: '#F59E0B', emoji: '🌟' },
-  { value: 'A', label: 'Betyg A', desc: 'Utmärkta kunskaper', color: '#10B981', emoji: '🏆' },
+  { value: 'E', label: 'Betyg E', desc: 'Grundläggande kunskaper', color: '#6B7280', emoji: '' },
+  { value: 'C', label: 'Betyg C', desc: 'Goda kunskaper', color: '#8B5CF6', emoji: '' },
+  { value: 'A', label: 'Betyg A', desc: 'Utmärkta kunskaper', color: '#10B981', emoji: '' },
 ]
 
 export default function OnboardingPage() {
@@ -21,8 +19,8 @@ export default function OnboardingPage() {
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="text-6xl mb-4" role="img" aria-label="Wave">👋</div>
-          <h1 className="text-3xl font-bold text-text mb-2">Välkommen till Mathu!</h1>
+          <div className="text-6xl mb-4" role="img" aria-label="Wave"></div>
+          <h1 className="text-3xl font-bold text-text mb-2">Välkommen till MathU!</h1>
           <p className="text-text-muted text-lg">Vilket betyg siktar du på i Matematik 1b?</p>
           <p className="text-text-muted text-sm mt-2">
             Vi anpassar uppgifterna efter ditt mål för att hjälpa dig nå dit.
@@ -89,7 +87,7 @@ export default function OnboardingPage() {
             loading={pending}
             className="shadow-lg shadow-primary/25"
           >
-            Kom igång! 🚀
+            Kom igång!
           </Button>
 
           <p className="text-center text-xs text-text-muted mt-4">
