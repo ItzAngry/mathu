@@ -1,18 +1,35 @@
 'use client'
 
-import { useState, Fragment } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import RoadmapNode from './RoadmapNode'
 import RoadmapConnector from './RoadmapConnector'
 import NodeModal from './NodeModal'
+import ChapterSkipModal from './ChapterSkipModal'
+import { getSkippedChapterIds, addSkippedChapter, CHAPTER_SKIP_EVENT } from '@/lib/pluggaChapterUnlock'
 
 // Zigzag positions — must match the pl/pr offsets in the render below
 const POSITIONS = ['center', 'right', 'center', 'left', 'center']
 
 export default function RoadmapChapter({ chapter, nodes, progressMap, chapterIndex, previousChapterComplete }) {
   const [activeNode, setActiveNode] = useState(null)
+  const [skipModalOpen, setSkipModalOpen] = useState(false)
+  const [skippedIds, setSkippedIds] = useState(() =>
+    typeof window !== 'undefined' ? new Set(getSkippedChapterIds()) : new Set()
+  )
 
-  const isUnlocked = chapterIndex === 0 || previousChapterComplete
+  useEffect(() => {
+    function syncSkipped() {
+      setSkippedIds(new Set(getSkippedChapterIds()))
+    }
+    syncSkipped()
+    window.addEventListener(CHAPTER_SKIP_EVENT, syncSkipped)
+    return () => window.removeEventListener(CHAPTER_SKIP_EVENT, syncSkipped)
+  }, [])
+
+  const naturallyUnlocked = chapterIndex === 0 || previousChapterComplete
+  const skippedUnlocked = skippedIds.has(chapter.id)
+  const isUnlocked = naturallyUnlocked || skippedUnlocked
 
   function isNodeActive(nodeIndex) {
     if (!isUnlocked) return false
@@ -95,18 +112,30 @@ export default function RoadmapChapter({ chapter, nodes, progressMap, chapterInd
           {chapter.icon}
         </div>
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
               Kapitel {chapterIndex + 1}
             </span>
             {!isUnlocked && (
+              <span className="text-xs bg-surface-2 text-text-muted px-2 py-0.5 rounded-full">Låst</span>
+            )}
+            {skippedUnlocked && !naturallyUnlocked && (
               <span className="text-xs bg-surface-2 text-text-muted px-2 py-0.5 rounded-full">
-                🔒 Låst
+                Öppnat utan föregående kapitel
               </span>
             )}
           </div>
           <h2 className="text-lg font-bold text-text">{chapter.title}</h2>
           <p className="text-xs text-text-muted">{completedCount}/{nodes.length} avklarat</p>
+          {!naturallyUnlocked && !skippedUnlocked && (
+            <button
+              type="button"
+              onClick={() => setSkipModalOpen(true)}
+              className="mt-2 text-xs font-medium text-primary hover:text-primary-dark underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded-sm"
+            >
+              Hoppa till kapitel
+            </button>
+          )}
         </div>
       </motion.div>
 
@@ -119,6 +148,16 @@ export default function RoadmapChapter({ chapter, nodes, progressMap, chapterInd
             node={activeNode}
             progress={progressMap[activeNode.id]}
             onClose={() => setActiveNode(null)}
+          />
+        )}
+        {skipModalOpen && (
+          <ChapterSkipModal
+            chapterTitle={chapter.title}
+            onClose={() => setSkipModalOpen(false)}
+            onConfirm={() => {
+              addSkippedChapter(chapter.id)
+              setSkipModalOpen(false)
+            }}
           />
         )}
       </AnimatePresence>
