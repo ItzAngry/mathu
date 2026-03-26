@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useActionState } from 'react'
 import { logout } from '@/lib/actions/auth'
@@ -120,12 +121,12 @@ export default function Sidebar({ profile }) {
       >
         <Link
           href="/plugga"
-          aria-label="Mathu – hem"
+          aria-label="MathU – hem"
           className="flex items-center gap-2 rounded-xl focus-visible:outline-2 focus-visible:outline-primary"
         >
-          <span className="text-2xl leading-none" role="img" aria-hidden="true">🧮</span>
+          <Image src="/mathu-logo.svg" alt="MathU logo" width={32} height={32} className="w-8 h-8" />
           {!sidebarCollapsed && (
-            <span className="font-bold text-base text-text whitespace-nowrap">Mathu</span>
+            <span className="font-bold text-base text-text whitespace-nowrap">MathU</span>
           )}
         </Link>
 

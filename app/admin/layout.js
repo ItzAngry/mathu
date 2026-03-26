@@ -29,9 +29,10 @@ export default async function AdminLayout({ children }) {
         </div>
         <ul className="flex flex-col gap-1" role="list">
           {[
-            { href: '/admin', label: '📊 Översikt' },
-            { href: '/admin/questions', label: '❓ Frågor' },
-            { href: '/admin/tests', label: '📝 Prov & Noder' },
+            { href: '/admin', label: 'Översikt' },
+            { href: '/admin/roadmap', label: 'Kursträd' },
+            { href: '/admin/questions', label: 'Frågor' },
+            { href: '/admin/tests', label: 'Prov & Noder' },
           ].map(({ href, label }) => (
             <li key={href}>
               <Link

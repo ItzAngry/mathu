@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabaseServer'
 import { redirect } from 'next/navigation'
 import ProgressBar from '@/components/layout/ProgressBar'
-import RoadmapChapter from '@/components/roadmap/RoadmapChapter'
-import RoadmapScroller from '@/components/roadmap/RoadmapScroller'
+import PluggaJumpControls from '@/components/roadmap/PluggaJumpControls'
+import PluggaRoadmapList from '@/components/roadmap/PluggaRoadmapList'
 
 export const metadata = { title: 'Plugga' }
 
@@ -46,46 +46,19 @@ export default async function PluggaPage() {
   const totalNodes = nodes?.length ?? 0
   const completedNodes = Object.values(progressMap).filter((p) => p.completed).length
 
-  // Check if previous chapter is complete (uses original chapter order)
-  function isPrevChapterComplete(chapterIdx) {
-    if (chapterIdx === 0) return true
-    const prevChapter = chapters[chapterIdx - 1]
-    const prevNodes = nodesByChapter[prevChapter?.id] ?? []
-    return prevNodes.every((n) => progressMap[n.id]?.completed)
-  }
-
   return (
     <div className="flex flex-col min-h-screen">
       {/* Progress bar — sticky at top */}
       <div className="sticky top-0 z-30 bg-surface/95 backdrop-blur-sm border-b border-border">
         <ProgressBar completed={completedNodes} total={totalNodes} label="Din framgång i Matte1b" />
+        <PluggaJumpControls />
       </div>
 
       {/* Roadmap — flex-col-reverse so chapter 1 renders at bottom */}
       <div className="flex flex-col-reverse py-10 max-w-2xl mx-auto w-full px-2">
-
-        {/* Chapters in original DOM order; flex-col-reverse makes ch1 appear at bottom */}
-        {chapters?.map((chapter, idx) => (
-          <RoadmapChapter
-            key={chapter.id}
-            chapter={chapter}
-            nodes={nodesByChapter[chapter.id] ?? []}
-            progressMap={progressMap}
-            chapterIndex={idx}
-            previousChapterComplete={isPrevChapterComplete(idx)}
-          />
-        ))}
-
-        {(!chapters || chapters.length === 0) && (
-          <div className="text-center py-20 text-text-muted">
-            <div className="text-5xl mb-4">📚</div>
-            <p>Kursen håller på att byggas upp. Kom tillbaka snart!</p>
-          </div>
-        )}
+        <PluggaRoadmapList chapters={chapters ?? []} nodesByChapter={nodesByChapter} progressMap={progressMap} />
       </div>
 
-      {/* Scroll to bottom on mount so user starts at chapter 1 */}
-      <RoadmapScroller />
     </div>
   )
 }

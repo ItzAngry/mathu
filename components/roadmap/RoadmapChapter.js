@@ -1,19 +1,43 @@
 'use client'
 
 import { useState, useEffect, Fragment } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import RoadmapNode from './RoadmapNode'
 import RoadmapConnector from './RoadmapConnector'
 import NodeModal from './NodeModal'
 import ChapterSkipModal from './ChapterSkipModal'
-import { getSkippedChapterIds, addSkippedChapter, CHAPTER_SKIP_EVENT } from '@/lib/pluggaChapterUnlock'
+import {
+  getSkippedChapterIds,
+  addSkippedChapter,
+  pushJumpRecord,
+  clearAllChapterSkipState,
+  CHAPTER_SKIP_EVENT,
+} from '@/lib/pluggaChapterUnlock'
+import { completePriorNodesForChapterSkip, resetRoadmapProgressFromChapter } from '@/lib/actions/progress'
+import { PLUGGA_LESSON_ANCHOR_ID } from '@/lib/pluggaProgressUtils'
 
 // Zigzag positions — must match the pl/pr offsets in the render below
 const POSITIONS = ['center', 'right', 'center', 'left', 'center']
 
-export default function RoadmapChapter({ chapter, nodes, progressMap, chapterIndex, previousChapterComplete }) {
+const chapterJumpChipClass =
+  'inline-flex items-center justify-center rounded-lg border border-amber-200/95 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-950 shadow-sm hover:bg-amber-100 transition-colors focus-visible:outline-2 focus-visible:outline-amber-500 focus-visible:outline-offset-2'
+
+export default function RoadmapChapter({
+  chapter,
+  nodes,
+  progressMap,
+  chapterIndex,
+  previousChapterComplete,
+  canOfferRestartFromThisChapter = false,
+  lessonAnchorChapterId = null,
+  lessonAnchorNodeId = null,
+}) {
+  const router = useRouter()
   const [activeNode, setActiveNode] = useState(null)
   const [skipModalOpen, setSkipModalOpen] = useState(false)
+  const [skipLoading, setSkipLoading] = useState(false)
+  const [restartLoading, setRestartLoading] = useState(false)
   const [skippedIds, setSkippedIds] = useState(() =>
     typeof window !== 'undefined' ? new Set(getSkippedChapterIds()) : new Set()
   )
@@ -42,8 +66,40 @@ export default function RoadmapChapter({ chapter, nodes, progressMap, chapterInd
 
   const completedCount = nodes.filter((n) => progressMap[n.id]?.completed).length
 
+  const showRestartChip = canOfferRestartFromThisChapter
+  const showSkipChip = chapterIndex >= 1 && !naturallyUnlocked && !skippedUnlocked
+
+  async function handleRestartFromThisChapter() {
+    if (
+      !confirm(
+        `Avklarmarkeringar i "${chapter.title}" och alla senare kapitel nollställs. Tidigare kapitel påverkas inte. Sparade kapitelhopp tas bort. Fortsätt?`
+      )
+    ) {
+      return
+    }
+    setRestartLoading(true)
+    const result = await resetRoadmapProgressFromChapter(chapter.id)
+    setRestartLoading(false)
+    if (result.error) {
+      alert('Fel: ' + result.error)
+      return
+    }
+    clearAllChapterSkipState()
+    router.refresh()
+  }
+
+  const chapterNeedsSrAnchor =
+    chapter.id === lessonAnchorChapterId && lessonAnchorNodeId == null
+
   return (
-    <div className="mb-2">
+    <div className="mb-2 scroll-mt-24 relative" id={`plugga-chapter-${chapter.id}`}>
+      {chapterNeedsSrAnchor && (
+        <span
+          id={PLUGGA_LESSON_ANCHOR_ID}
+          className="absolute left-1/2 top-8 -translate-x-1/2 w-px h-px overflow-hidden pointer-events-none scroll-mt-28"
+          aria-hidden="true"
+        />
+      )}
       {/*
         flex-col-reverse: DOM order [node0, conn0, node1, conn1, ..., nodeN-1]
         renders visually as  [nodeN-1, connN-2, ..., conn0, node0]
@@ -55,27 +111,36 @@ export default function RoadmapChapter({ chapter, nodes, progressMap, chapterInd
           const nextPos = POSITIONS[(idx + 1) % POSITIONS.length]
           const active = isNodeActive(idx)
           const prog = progressMap[node.id]
+          const isLessonAnchor =
+            lessonAnchorNodeId != null &&
+            chapter.id === lessonAnchorChapterId &&
+            node.id === lessonAnchorNodeId
 
           return (
             <Fragment key={node.id}>
-              {/* Node — offset left/center/right */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: chapterIndex * 0.1 + idx * 0.08, type: 'spring', stiffness: 200 }}
+              {/* Yttre div bär id (scroll) — motion forwardar inte alltid id till DOM. */}
+              <div
+                id={isLessonAnchor ? PLUGGA_LESSON_ANCHOR_ID : undefined}
                 className={[
-                  'flex w-full',
+                  'flex w-full scroll-mt-28',
                   pos === 'left'  ? 'justify-start pl-8' :
                   pos === 'right' ? 'justify-end pr-8'   : 'justify-center',
                 ].join(' ')}
               >
-                <RoadmapNode
-                  node={node}
-                  progress={prog}
-                  isActive={active}
-                  onClick={() => setActiveNode(node)}
-                />
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: chapterIndex * 0.1 + idx * 0.08, type: 'spring', stiffness: 200 }}
+                  className="flex justify-center"
+                >
+                  <RoadmapNode
+                    node={node}
+                    progress={prog}
+                    isActive={active}
+                    onClick={() => setActiveNode(node)}
+                  />
+                </motion.div>
+              </div>
 
               {/*
                 Connector placed AFTER the node in DOM.
@@ -127,14 +192,29 @@ export default function RoadmapChapter({ chapter, nodes, progressMap, chapterInd
           </div>
           <h2 className="text-lg font-bold text-text">{chapter.title}</h2>
           <p className="text-xs text-text-muted">{completedCount}/{nodes.length} avklarat</p>
-          {!naturallyUnlocked && !skippedUnlocked && (
-            <button
-              type="button"
-              onClick={() => setSkipModalOpen(true)}
-              className="mt-2 text-xs font-medium text-primary hover:text-primary-dark underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded-sm"
-            >
-              Hoppa till kapitel
-            </button>
+          {(showRestartChip || showSkipChip) && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {showRestartChip && (
+                <button
+                  type="button"
+                  onClick={() => void handleRestartFromThisChapter()}
+                  className={chapterJumpChipClass}
+                  disabled={restartLoading || skipLoading}
+                >
+                  {restartLoading ? 'Nollställer…' : 'Börja om från detta kapitel'}
+                </button>
+              )}
+              {showSkipChip && (
+                <button
+                  type="button"
+                  onClick={() => setSkipModalOpen(true)}
+                  className={chapterJumpChipClass}
+                  disabled={restartLoading || skipLoading}
+                >
+                  Hoppa till detta kapitel
+                </button>
+              )}
+            </div>
           )}
         </div>
       </motion.div>
@@ -153,10 +233,23 @@ export default function RoadmapChapter({ chapter, nodes, progressMap, chapterInd
         {skipModalOpen && (
           <ChapterSkipModal
             chapterTitle={chapter.title}
-            onClose={() => setSkipModalOpen(false)}
-            onConfirm={() => {
-              addSkippedChapter(chapter.id)
-              setSkipModalOpen(false)
+            loading={skipLoading}
+            onClose={() => !skipLoading && setSkipModalOpen(false)}
+            onConfirm={async () => {
+              setSkipLoading(true)
+              try {
+                const result = await completePriorNodesForChapterSkip(chapter.id)
+                if (result.error) {
+                  alert('Fel: ' + result.error)
+                  return
+                }
+                pushJumpRecord({ chapterId: chapter.id, autoNodeIds: result.autoNodeIds ?? [] })
+                addSkippedChapter(chapter.id)
+                setSkipModalOpen(false)
+                router.refresh()
+              } finally {
+                setSkipLoading(false)
+              }
             }}
           />
         )}

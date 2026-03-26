@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import QuestionSession from '@/components/questions/QuestionSession'
-import MathewChatbot from '@/components/chat/MathewChatbot'
 
 export default function ProvClient({ testNodes, progressMap }) {
   const [activeTest, setActiveTest] = useState(null)
@@ -76,7 +75,6 @@ export default function ProvClient({ testNodes, progressMap }) {
         )}
       </div>
 
-      <MathewChatbot />
     </div>
   )
 }

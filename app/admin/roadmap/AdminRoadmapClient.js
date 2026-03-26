@@ -4,7 +4,14 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Button from '@/components/ui/Button'
 import ContentMdTextarea from '@/components/admin/ContentMdTextarea'
-import { upsertNode, deleteNode, upsertQuestion, deleteQuestion } from '@/lib/actions/admin'
+import {
+  upsertNode,
+  deleteNode,
+  upsertQuestion,
+  deleteQuestion,
+  upsertChapter,
+  deleteChapter,
+} from '@/lib/actions/admin'
 
 // ── Type config ────────────────────────────────────────────────────────────
 const TYPE = {
@@ -363,6 +370,146 @@ function QuestionRow({ q, onEdit, onDelete }) {
   )
 }
 
+function nextChapterOrderIndex(chapters) {
+  const max = chapters.reduce((m, c) => Math.max(m, Number(c.order_index) || 0), -1)
+  return chapters.length === 0 ? 0 : max + 1
+}
+
+/** Modal: skapa eller redigera kapitel */
+function ChapterEditorModal({ chapter, isNew, onClose, onSaved }) {
+  const [saving, setSaving] = useState(false)
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setSaving(true)
+    const result = await upsertChapter(new FormData(e.target))
+    setSaving(false)
+    if (result.error) {
+      alert('Fel: ' + result.error)
+      return
+    }
+    onSaved()
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/45"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="chapter-editor-title"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+      >
+        <div className="p-5 border-b border-border flex items-center justify-between">
+          <h3 id="chapter-editor-title" className="text-lg font-bold text-text">
+            {isNew ? 'Nytt kapitel' : 'Redigera kapitel'}
+          </h3>
+          <button type="button" onClick={onClose} className="p-1 text-text-muted hover:text-text" aria-label="Stäng">
+            ✕
+          </button>
+        </div>
+        <form key={chapter.id ?? 'new-chapter'} onSubmit={handleSubmit} className="p-5 space-y-3">
+          {chapter.id ? <input type="hidden" name="id" defaultValue={chapter.id} /> : null}
+
+          <div>
+            <label className="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">Titel *</label>
+            <input
+              type="text"
+              name="title"
+              defaultValue={chapter.title ?? ''}
+              required
+              className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">Titel (engelska)</label>
+            <input
+              type="text"
+              name="title_en"
+              defaultValue={chapter.title_en ?? ''}
+              className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">Beskrivning</label>
+            <textarea
+              name="description"
+              defaultValue={chapter.description ?? ''}
+              rows={2}
+              className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-y"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">Beskrivning (engelska)</label>
+            <textarea
+              name="description_en"
+              defaultValue={chapter.description_en ?? ''}
+              rows={2}
+              className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-y"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">Ordning</label>
+              <input
+                type="number"
+                name="order_index"
+                defaultValue={chapter.order_index ?? 0}
+                className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">Publicerad</label>
+              <label className="flex items-center gap-2 mt-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="is_published"
+                  defaultChecked={chapter.is_published !== false}
+                  className="w-4 h-4 accent-primary rounded"
+                />
+                Syns för elever
+              </label>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">Färg (hex)</label>
+              <input
+                type="text"
+                name="color"
+                defaultValue={chapter.color ?? '#6C63FF'}
+                className="w-full px-3 py-2.5 rounded-xl border border-border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1">Ikon (emoji)</label>
+              <input
+                type="text"
+                name="icon"
+                defaultValue={chapter.icon ?? '📚'}
+                className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <Button type="submit" variant="primary" size="md" loading={saving} fullWidth>
+              Spara
+            </Button>
+            <Button type="button" variant="secondary" size="md" onClick={onClose}>
+              Avbryt
+            </Button>
+          </div>
+        </form>
+      </motion.div>
+    </div>
+  )
+}
+
 // ── Main component ─────────────────────────────────────────────────────────
 export default function AdminRoadmapClient({ chapters, nodes: initNodes, questions: initQuestions }) {
   const [nodes, setNodes] = useState(initNodes)
@@ -370,6 +517,8 @@ export default function AdminRoadmapClient({ chapters, nodes: initNodes, questio
 
   // panel = null | { type: 'node'|'newNode', node, tab: 'props'|'questions', addingQ: bool, editingQ: null|obj }
   const [panel, setPanel] = useState(null)
+  /** null | { chapter, isNew } */
+  const [chapterEditor, setChapterEditor] = useState(null)
 
   // ── Derived data ──────────────────────────────────────────────────────
   const nodesByChapter = {}
@@ -425,6 +574,32 @@ export default function AdminRoadmapClient({ chapters, nodes: initNodes, questio
     window.location.reload()
   }
 
+  async function handleDeleteChapter(chapterId) {
+    if (!confirm('Ta bort kapitlet? Går bara om det saknar noder och kapitel-kopplade frågor.')) return
+    const result = await deleteChapter(chapterId)
+    if (result.error) {
+      alert(result.error)
+      return
+    }
+    handleSaved()
+  }
+
+  function openNewChapterEditor() {
+    setChapterEditor({
+      isNew: true,
+      chapter: {
+        title: '',
+        title_en: '',
+        description: '',
+        description_en: '',
+        order_index: nextChapterOrderIndex(chapters),
+        color: '#6C63FF',
+        icon: '📚',
+        is_published: true,
+      },
+    })
+  }
+
   const pNode = panel?.node
 
   return (
@@ -435,13 +610,16 @@ export default function AdminRoadmapClient({ chapters, nodes: initNodes, questio
         style={{ paddingRight: panel ? 448 : 0 }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
           <div>
             <h2 className="text-2xl font-bold text-text">Kursträd</h2>
             <p className="text-sm text-text-muted mt-0.5">
               {chapters.length} kapitel · {nodes.length} noder · {questions.length} frågor
             </p>
           </div>
+          <Button variant="primary" size="md" onClick={openNewChapterEditor}>
+            + Nytt kapitel
+          </Button>
         </div>
 
         {/* Chapter list */}
@@ -463,12 +641,36 @@ export default function AdminRoadmapClient({ chapters, nodes: initNodes, questio
                       {cNodes.length} noder · {cQuestions} frågor
                     </p>
                   </div>
-                  <span
-                    className="text-xs font-medium px-2 py-1 rounded-full"
-                    style={{ backgroundColor: (chapter.color ?? '#6C63FF') + '18', color: chapter.color ?? '#6C63FF' }}
-                  >
-                    Kapitel {chapters.indexOf(chapter) + 1}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span
+                      className="text-xs font-medium px-2 py-1 rounded-full"
+                      style={{ backgroundColor: (chapter.color ?? '#6C63FF') + '18', color: chapter.color ?? '#6C63FF' }}
+                    >
+                      Kapitel {chapters.indexOf(chapter) + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setChapterEditor({ isNew: false, chapter })}
+                      className="p-2 rounded-lg text-text-muted hover:bg-surface-2 hover:text-primary transition-colors"
+                      title="Redigera kapitel"
+                      aria-label="Redigera kapitel"
+                    >
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4" aria-hidden="true">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteChapter(chapter.id)}
+                      className="p-2 rounded-lg text-text-muted hover:bg-danger/10 hover:text-danger transition-colors"
+                      title="Ta bort kapitel"
+                      aria-label="Ta bort kapitel"
+                    >
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4" aria-hidden="true">
+                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Node list */}
@@ -509,9 +711,12 @@ export default function AdminRoadmapClient({ chapters, nodes: initNodes, questio
           })}
 
           {chapters.length === 0 && (
-            <div className="text-center py-16 text-text-muted">
+            <div className="text-center py-16 text-text-muted space-y-4">
               <div className="text-4xl mb-3">📚</div>
               <p>Inga kapitel ännu.</p>
+              <Button variant="primary" size="md" onClick={openNewChapterEditor}>
+                Skapa första kapitlet
+              </Button>
             </div>
           )}
         </div>
@@ -654,6 +859,15 @@ export default function AdminRoadmapClient({ chapters, nodes: initNodes, questio
           )}
         </AnimatePresence>
       </div>
+
+      {chapterEditor && (
+        <ChapterEditorModal
+          chapter={chapterEditor.chapter}
+          isNew={chapterEditor.isNew}
+          onClose={() => setChapterEditor(null)}
+          onSaved={handleSaved}
+        />
+      )}
     </div>
   )
 }

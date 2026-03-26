@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import Button from '@/components/ui/Button'
 
-export default function ChapterSkipModal({ chapterTitle, onClose, onConfirm }) {
+export default function ChapterSkipModal({ chapterTitle, onClose, onConfirm, loading = false }) {
   const panelRef = useRef(null)
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function ChapterSkipModal({ chapterTitle, onClose, onConfirm }) {
     first?.focus()
 
     function onKey(e) {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape' && !loading) onClose()
       if (e.key === 'Tab') {
         if (e.shiftKey && document.activeElement === first) {
           e.preventDefault()
@@ -32,7 +32,7 @@ export default function ChapterSkipModal({ chapterTitle, onClose, onConfirm }) {
 
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [onClose, loading])
 
   return (
     <motion.div
@@ -46,7 +46,7 @@ export default function ChapterSkipModal({ chapterTitle, onClose, onConfirm }) {
     >
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={() => !loading && onClose()}
         aria-hidden="true"
       />
 
@@ -71,15 +71,32 @@ export default function ChapterSkipModal({ chapterTitle, onClose, onConfirm }) {
             steg. Om du hoppar över ett kapitel kan det bli svårare att hänga med i senare delar.
           </p>
           <p className="text-sm text-text mt-3 leading-relaxed">
-            Du kan ändå öppna detta kapitel och arbeta i det om du vill.
+            Om du fortsätter markeras alla uppgifter och prov i <strong>tidigare kapitel</strong> som avklarade, så att
+            du kan arbeta i det här kapitlet. Du kan senare <strong>ångra hoppet</strong> (då blir de automatiskt
+            ifyllda stegen inte avklarade igen om du inte redan gjort dem på riktigt).
           </p>
         </div>
 
         <div className="p-6 pt-2 flex flex-col sm:flex-row gap-2 sm:justify-end border-t border-border bg-surface-2/50">
-          <Button type="button" variant="secondary" size="md" onClick={onClose} className="sm:min-w-[7rem]">
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onClick={onClose}
+            className="sm:min-w-[7rem]"
+            disabled={loading}
+          >
             Tillbaka
           </Button>
-          <Button type="button" variant="primary" size="md" onClick={onConfirm} className="sm:min-w-[7rem]">
+          <Button
+            type="button"
+            variant="primary"
+            size="md"
+            onClick={() => void onConfirm()}
+            className="sm:min-w-[7rem]"
+            loading={loading}
+            disabled={loading}
+          >
             Öppna kapitel
           </Button>
         </div>

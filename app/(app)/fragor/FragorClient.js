@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import AnswerChecker from '@/components/questions/AnswerChecker'
-import MathewChatbot from '@/components/chat/MathewChatbot'
 import Button from '@/components/ui/Button'
 
 export default function FragorClient({ chapters, gradeGoal }) {
@@ -113,7 +112,6 @@ export default function FragorClient({ chapters, gradeGoal }) {
           </AnimatePresence>
         </div>
 
-        <MathewChatbot />
       </div>
     )
   }
@@ -164,7 +162,6 @@ export default function FragorClient({ chapters, gradeGoal }) {
         )}
       </div>
 
-      <MathewChatbot />
     </div>
   )
 }

@@ -46,7 +46,7 @@ function SmallMascot({ size = 50 }) {
 // ── Typing indicator ───────────────────────────────────────────────────────
 function TypingDots() {
   return (
-    <div className="flex gap-1.5 px-4 py-3" aria-label="Mathew skriver...">
+    <div className="flex gap-1.5 px-4 py-3" aria-label="Matheus skriver...">
       {[0, 1, 2].map((i) => (
         <div
           key={i}
@@ -67,7 +67,7 @@ const SUGGESTIONS = [
   'Vad är sannolikhet?',
 ]
 
-const GREETING = 'Hej! Jag är Mathew. Jag är din personliga AI-matematiklärare för Matte 1b. Fråga mig vad som helst — jag förklarar, hjälper dig lösa problem och ger tips på hur du kan förbättra din förståelse.'
+const GREETING = 'Hej! Jag är Matheus. Jag är din personliga AI-matematiklärare för Matte 1b. Fråga mig vad som helst — jag förklarar, hjälper dig lösa problem och ger tips på hur du kan förbättra din förståelse.'
 
 export default function MathewPage() {
   const [messages, setMessages] = useState([])
@@ -129,7 +129,7 @@ export default function MathewPage() {
       <div className="flex items-center gap-3 px-6 py-4 bg-white border-b border-border shrink-0">
         <Mascot size={40} />
         <div className="flex-1">
-          <h1 className="font-bold text-text text-lg leading-tight">Mathew</h1>
+          <h1 className="font-bold text-text text-lg leading-tight">Matheus</h1>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-success inline-block" aria-hidden="true" />
             <span className="text-xs text-text-muted">AI-matematiklärare · Alltid redo att hjälpa</span>
@@ -151,7 +151,7 @@ export default function MathewPage() {
         className="flex-1 overflow-y-auto"
         role="log"
         aria-live="polite"
-        aria-label="Konversation med Mathew"
+        aria-label="Konversation med Matheus"
       >
         {/* Welcome / empty state */}
         <AnimatePresence>
@@ -165,7 +165,7 @@ export default function MathewPage() {
             >
               <Mascot size={100} />
 
-              <h2 className="mt-6 text-2xl font-bold text-text">Hej! Jag är Mathew</h2>
+              <h2 className="mt-6 text-2xl font-bold text-text">Hej! Jag är Matheus</h2>
               <p className="mt-2 text-text-muted text-sm max-w-sm leading-relaxed">
                 Din personliga AI-matematiklärare för Matte&nbsp;1b. Ställ en fråga eller välj ett ämne nedan.
               </p>
@@ -242,9 +242,9 @@ export default function MathewPage() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ställ en fråga till Mathew..."
+            placeholder="Ställ en fråga till Matheus..."
             disabled={loading}
-            aria-label="Meddelande till Mathew"
+            aria-label="Meddelande till Matheus"
             className="flex-1 px-4 py-3 rounded-2xl border border-border bg-surface text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
           />
           <button

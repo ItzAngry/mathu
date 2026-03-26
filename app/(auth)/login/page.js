@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { login, loginWithGoogle } from '@/lib/actions/auth'
 import Button from '@/components/ui/Button'
 
@@ -32,7 +33,7 @@ export default function LoginPage() {
           ))}
         </div>
         <div className="relative z-10 text-center">
-          <div className="text-7xl mb-6" role="img" aria-label="Mathu mascot">🧮</div>
+          <Image src="/mathu-logo.svg" alt="Mathu mascot" width={120} height={108} className="mb-6 mx-auto" />
           <h1 className="text-4xl font-bold mb-3">Mathu</h1>
           <p className="text-xl text-white/80 max-w-xs">
             Din personliga matematikresa – från nybörjare till mästare.
@@ -45,7 +46,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <div className="text-5xl mb-3" role="img" aria-label="Mathu mascot">🧮</div>
+            <Image src="/mathu-logo.svg" alt="Mathu mascot" width={100} height={100} className="mb-3 mx-auto" />
             <h1 className="text-3xl font-bold text-primary">Mathu</h1>
           </div>
 
