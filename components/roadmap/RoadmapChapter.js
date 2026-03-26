@@ -6,12 +6,14 @@ import RoadmapNode from './RoadmapNode'
 import RoadmapConnector from './RoadmapConnector'
 import NodeModal from './NodeModal'
 
+// Zigzag positions — must match the pl/pr offsets in the render below
+const POSITIONS = ['center', 'right', 'center', 'left', 'center']
+
 export default function RoadmapChapter({ chapter, nodes, progressMap, chapterIndex, previousChapterComplete }) {
   const [activeNode, setActiveNode] = useState(null)
 
   const isUnlocked = chapterIndex === 0 || previousChapterComplete
 
-  // A node is accessible if all previous nodes in this chapter are completed
   function isNodeActive(nodeIndex) {
     if (!isUnlocked) return false
     if (nodeIndex === 0) return true
@@ -23,27 +25,22 @@ export default function RoadmapChapter({ chapter, nodes, progressMap, chapterInd
 
   const completedCount = nodes.filter((n) => progressMap[n.id]?.completed).length
 
-  // Zigzag positions (applied to each node)
-  const positions = ['center', 'right', 'center', 'left', 'center']
-
   return (
-    <div className="mb-4">
-      {/* ── Nodes — flex-col-reverse so node[0] is at visual bottom ─────── */}
-      <div className="flex flex-col-reverse items-center px-6">
+    <div className="mb-2">
+      {/*
+        flex-col-reverse: DOM order [node0, conn0, node1, conn1, ..., nodeN-1]
+        renders visually as  [nodeN-1, connN-2, ..., conn0, node0]
+        → node0 at visual BOTTOM (start of chapter), nodeN-1 at visual TOP
+      */}
+      <div className="flex flex-col-reverse px-4">
         {nodes.map((node, idx) => {
-          const pos = positions[idx % positions.length]
+          const pos = POSITIONS[idx % POSITIONS.length]
+          const nextPos = POSITIONS[(idx + 1) % POSITIONS.length]
           const active = isNodeActive(idx)
           const prog = progressMap[node.id]
 
           return (
             <Fragment key={node.id}>
-              {/* Connector above this node (towards next node upward) */}
-              {idx < nodes.length - 1 && (
-                <div className="flex justify-center w-full">
-                  <RoadmapConnector completed={prog?.completed} />
-                </div>
-              )}
-
               {/* Node — offset left/center/right */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -51,8 +48,8 @@ export default function RoadmapChapter({ chapter, nodes, progressMap, chapterInd
                 transition={{ delay: chapterIndex * 0.1 + idx * 0.08, type: 'spring', stiffness: 200 }}
                 className={[
                   'flex w-full',
-                  pos === 'left'  ? 'justify-start pl-10' :
-                  pos === 'right' ? 'justify-end pr-10'   : 'justify-center',
+                  pos === 'left'  ? 'justify-start pl-8' :
+                  pos === 'right' ? 'justify-end pr-8'   : 'justify-center',
                 ].join(' ')}
               >
                 <RoadmapNode
@@ -62,17 +59,33 @@ export default function RoadmapChapter({ chapter, nodes, progressMap, chapterInd
                   onClick={() => setActiveNode(node)}
                 />
               </motion.div>
+
+              {/*
+                Connector placed AFTER the node in DOM.
+                With flex-col-reverse, it appears ABOVE node[idx] visually,
+                connecting up toward node[idx+1].
+                  topPos    = position of the node ABOVE (idx+1)
+                  bottomPos = position of this node (idx)
+              */}
+              {idx < nodes.length - 1 && (
+                <RoadmapConnector
+                  completed={prog?.completed}
+                  topPos={nextPos}
+                  bottomPos={pos}
+                />
+              )}
             </Fragment>
           )
         })}
       </div>
 
-      {/* ── Chapter header — sits below the nodes (user sees this first when scrolling up) */}
+      {/* Chapter header — sits below the nodes in the DOM so it appears at the
+          bottom of each chapter section when the outer list is flex-col-reverse */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: chapterIndex * 0.1 }}
-        className="flex items-center gap-3 mt-6 mb-2 px-6"
+        className="flex items-center gap-3 mt-4 mb-2 px-6"
       >
         <div
           className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl shadow-sm shrink-0"
@@ -93,14 +106,11 @@ export default function RoadmapChapter({ chapter, nodes, progressMap, chapterInd
             )}
           </div>
           <h2 className="text-lg font-bold text-text">{chapter.title}</h2>
-          <p className="text-xs text-text-muted">
-            {completedCount}/{nodes.length} avklarat
-          </p>
+          <p className="text-xs text-text-muted">{completedCount}/{nodes.length} avklarat</p>
         </div>
       </motion.div>
 
-      {/* Divider between chapters */}
-      <div className="mx-6 border-t border-border/60 mt-4" aria-hidden="true" />
+      <div className="mx-6 border-t border-border/50 mt-2" aria-hidden="true" />
 
       {/* Node modal */}
       <AnimatePresence>

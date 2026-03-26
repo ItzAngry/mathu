@@ -2,13 +2,13 @@
 -- 002_admin_rls.sql
 -- Adds is_admin + dark_mode columns and proper admin RLS policies.
 --
--- NOTE: The app uses createServiceClient() (service role key) for
--- all admin mutations. The service role bypasses RLS entirely, so
--- these policies are a belt-and-suspenders fallback for direct
--- Supabase Studio use or future API changes.
+-- NOTE: Admin server actions must use a Supabase client created with the
+-- service role key only (no user session/cookies). Otherwise requests use the
+-- logged-in user's JWT and RLS applies — inserts on nodes can fail with
+-- "violates row-level security policy".
 --
--- If admin mutations still fail, verify SUPABASE_SERVICE_ROLE_KEY
--- is set correctly in .env.local.
+-- These policies still help when using Studio as an authenticated admin
+-- or any path that uses the user's JWT on purpose.
 -- ============================================================
 
 -- Add is_admin column to user_profiles
