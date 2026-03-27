@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { register, loginWithGoogle } from '@/lib/actions/auth'
 import Button from '@/components/ui/Button'
 
@@ -9,31 +10,49 @@ export default function RegisterPage() {
   const [state, action, pending] = useActionState(register, null)
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Left — branding */}
+    <div className="min-h-screen flex flex-col lg:flex-row bg-surface">
+      {/* Left — branding panel */}
       <div
         className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12 text-white relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #6C63FF 0%, #574ECC 60%, #43C6AC 100%)' }}
+        style={{ background: 'linear-gradient(160deg, #1e2847 0%, #2e3758 55%, #3a4f7a 100%)' }}
         aria-hidden="true"
       >
-        <div className="absolute inset-0 opacity-10">
-          {[...Array(6)].map((_, i) => (
-            <div
+        {/* Subtle grid decoration */}
+        <div className="absolute inset-0 opacity-[0.06]">
+          <svg width="100%" height="100%">
+            <defs>
+              <pattern id="math-grid" width="48" height="48" patternUnits="userSpaceOnUse">
+                <path d="M 48 0 L 0 0 0 48" fill="none" stroke="white" strokeWidth="1" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#math-grid)" />
+          </svg>
+        </div>
+
+        {/* Floating math symbols */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[
+            { sym: 'f(x)', x: '12%', y: '18%', size: '1.1rem', rot: '-12deg' },
+            { sym: 'π', x: '80%', y: '14%', size: '1.8rem', rot: '8deg' },
+            { sym: '∫', x: '88%', y: '55%', size: '2rem', rot: '0deg' },
+            { sym: '√', x: '8%', y: '72%', size: '1.6rem', rot: '6deg' },
+            { sym: 'Σ', x: '75%', y: '80%', size: '1.5rem', rot: '-8deg' },
+            { sym: '∞', x: '22%', y: '88%', size: '1.4rem', rot: '4deg' },
+          ].map(({ sym, x, y, size, rot }, i) => (
+            <span
               key={i}
-              className="absolute rounded-full border-2 border-white"
-              style={{
-                width: `${(i + 1) * 100}px`,
-                height: `${(i + 1) * 100}px`,
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-              }}
-            />
+              className="absolute font-mono font-bold text-white/10 select-none"
+              style={{ left: x, top: y, fontSize: size, transform: `rotate(${rot})` }}
+            >
+              {sym}
+            </span>
           ))}
         </div>
+
         <div className="relative z-10 text-center">
-          <h1 className="text-4xl font-bold mb-3">MathU</h1>
-          <p className="text-xl text-white/80 max-w-xs">
+          <Image src="/mathu-logo.svg" alt="MathU mascot" width={120} height={108} className="mb-6 mx-auto drop-shadow-lg" />
+          <h1 className="text-4xl font-bold mb-3 tracking-tight">MathU</h1>
+          <p className="text-lg text-white/70 max-w-xs leading-relaxed">
             Börja din matematikresa idag – gratis och anpassad för dig.
           </p>
         </div>
@@ -42,11 +61,13 @@ export default function RegisterPage() {
       {/* Right — form */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
+          {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
+            <Image src="/mathu-logo.svg" alt="MathU mascot" width={100} height={100} className="mb-3 mx-auto" />
             <h1 className="text-3xl font-bold text-primary">MathU</h1>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-xl p-8 border border-border">
+          <div className="bg-white rounded-3xl shadow-sm border border-border p-8">
             <h2 className="text-2xl font-bold text-text mb-1">Skapa ditt konto</h2>
             <p className="text-text-muted mb-8 text-sm">
               Börja din matematikresa idag
@@ -95,8 +116,7 @@ export default function RegisterPage() {
                     autoComplete="name"
                     required
                     placeholder="Ditt namn"
-                    className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-text placeholder:text-text-muted text-sm
-                               focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                   />
                 </div>
 
@@ -111,8 +131,7 @@ export default function RegisterPage() {
                     autoComplete="email"
                     required
                     placeholder="din@email.se"
-                    className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-text placeholder:text-text-muted text-sm
-                               focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                   />
                 </div>
 
@@ -128,8 +147,7 @@ export default function RegisterPage() {
                     required
                     minLength={8}
                     placeholder="Minst 8 tecken"
-                    className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-text placeholder:text-text-muted text-sm
-                               focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-text placeholder:text-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                   />
                 </div>
               </div>
