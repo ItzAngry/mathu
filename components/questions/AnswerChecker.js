@@ -6,6 +6,7 @@ import CanvasInput from './CanvasInput'
 import GeoGebraEmbed from './GeoGebraEmbed'
 import QuestionCalculator from './QuestionCalculator'
 import Button from '@/components/ui/Button'
+import { useIsDesktop } from '@/hooks/useIsDesktop'
 
 const STAGES = {
   idle: 'idle',
@@ -41,6 +42,7 @@ export default function AnswerChecker({
   const [leftWidth, setLeftWidth] = useState(30)
   const containerRef = useRef(null)
   const dragging = useRef(false)
+  const isDesktop = useIsDesktop()
 
   const startDrag = useCallback((e) => {
     e.preventDefault()
@@ -310,7 +312,7 @@ export default function AnswerChecker({
       <div ref={containerRef} className="flex flex-col lg:flex-row flex-1 min-h-0 w-full">
         <div
           className="flex flex-col gap-4 min-w-0 min-h-0 overflow-y-auto p-4 sm:p-5 lg:p-6"
-          style={showRightPanel ? { width: `${leftWidth}%`, minWidth: '20%' } : { flex: 1, maxWidth: '42rem', margin: '0 auto', width: '100%' }}
+          style={showRightPanel && isDesktop ? { width: `${leftWidth}%`, minWidth: '20%' } : showRightPanel ? {} : { flex: 1, maxWidth: '42rem', margin: '0 auto', width: '100%' }}
         >
           {splitTopExtras ? <div className="space-y-3 shrink-0">{splitTopExtras}</div> : null}
           {questionBlock}
@@ -338,11 +340,11 @@ export default function AnswerChecker({
 
         {showRightPanel && (
           <aside
-            className="flex flex-col min-h-[min(52dvh,480px)] lg:min-h-0 shrink-0 bg-surface-2/60 border-t lg:border-t-0 border-border"
-            style={{ width: `${100 - leftWidth}%`, minWidth: '50%' }}
+            className="flex flex-col min-h-[min(52dvh,480px)] lg:min-h-0 lg:h-full shrink-0 bg-surface-2/60 border-t lg:border-t-0 border-border"
+            style={isDesktop ? { width: `${100 - leftWidth}%`, minWidth: '50%' } : {}}
           >
             {showGeoGebra ? (
-              <div className="flex flex-col flex-1 min-h-0">
+              <div className="flex min-h-0 w-full flex-1 flex-col">
                 <div
                   role="tablist"
                   aria-label="Verktyg bredvid uppgiften"
@@ -382,8 +384,8 @@ export default function AnswerChecker({
                   </button>
                 </div>
 
-                <div className="question-workspace-resize flex flex-col bg-white border-x border-b border-border rounded-b-2xl rounded-tr-2xl min-w-0">
-                  <div className="flex-1 min-h-0 min-w-0 flex flex-col">
+                <div className="question-workspace-split bg-white border-x border-b border-border rounded-b-2xl rounded-tr-2xl min-w-0">
+                  <div className="flex min-h-0 min-w-0 flex-1 flex-col">
                   {rightTab === 'canvas' ? (
                     <div
                       id="panel-canvas"
@@ -401,8 +403,8 @@ export default function AnswerChecker({
                           </Button>
                         </div>
                       ) : (
-                        <div className="flex flex-col flex-1 min-h-0 h-full p-4 sm:p-5">
-                          <div className="flex items-center justify-between gap-2 mb-3 shrink-0">
+                        <div className="flex h-full min-h-0 flex-1 flex-col p-4 sm:p-5">
+                          <div className="mb-3 flex shrink-0 items-center justify-between gap-2">
                             <h3 className="text-sm font-semibold text-text">Din rityta</h3>
                             <button
                               type="button"
@@ -416,11 +418,8 @@ export default function AnswerChecker({
                               Stäng rityta
                             </button>
                           </div>
-                          <p className="text-[11px] text-text-muted mb-2 shrink-0">
-                            Dra i nedre högra hörnet på ramen runt ritytan och GeoGebra för att ändra höjd.
-                          </p>
-                          <div className="flex-1 min-h-[280px] overflow-auto">
-                            <CanvasInput ref={canvasRef} width={800} height={480} onHasContent={setCanvasHasContent} />
+                          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                            <CanvasInput ref={canvasRef} fillContainer onHasContent={setCanvasHasContent} />
                           </div>
                         </div>
                       )}
@@ -439,10 +438,10 @@ export default function AnswerChecker({
                 </div>
               </div>
             ) : (
-              <div className="question-workspace-resize flex flex-col min-w-0">
+              <div className="question-workspace-split min-w-0 bg-white lg:rounded-b-2xl lg:border lg:border-border">
                 {!canvasPanelOpen ? (
-                  <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center min-h-[min(40dvh,280px)]">
-                    <p className="text-sm text-text-muted max-w-xs">
+                  <div className="flex min-h-[min(40dvh,280px)] flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+                    <p className="max-w-xs text-sm text-text-muted">
                       Vill du skissa eller visa uträkning för hand? Öppna ritytan till höger (på mobil under frågan).
                     </p>
                     <Button type="button" variant="secondary" size="md" onClick={() => setCanvasPanelOpen(true)}>
@@ -450,8 +449,8 @@ export default function AnswerChecker({
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex flex-col flex-1 min-h-0 h-full p-4 sm:p-5">
-                    <div className="flex items-center justify-between gap-2 mb-3 shrink-0">
+                  <div className="flex h-full min-h-0 flex-1 flex-col p-4 sm:p-5">
+                    <div className="mb-3 flex shrink-0 items-center justify-between gap-2">
                       <h3 className="text-sm font-semibold text-text">Din rityta</h3>
                       <button
                         type="button"
@@ -465,11 +464,8 @@ export default function AnswerChecker({
                         Stäng rityta
                       </button>
                     </div>
-                    <p className="text-[11px] text-text-muted mb-2 shrink-0">
-                      Dra i nedre högra hörnet för att ändra höjd.
-                    </p>
-                    <div className="flex-1 min-h-[280px] overflow-auto">
-                      <CanvasInput ref={canvasRef} width={800} height={480} onHasContent={setCanvasHasContent} />
+                    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                      <CanvasInput ref={canvasRef} fillContainer onHasContent={setCanvasHasContent} />
                     </div>
                   </div>
                 )}

@@ -108,7 +108,7 @@ export default function Sidebar({ profile }) {
   return (
     <nav
       style={{ width: sidebarCollapsed ? '80px' : '208px' }}
-      className="fixed left-0 top-0 h-full flex flex-col py-4 bg-white border-r border-border z-40 transition-[width] duration-300 overflow-hidden"
+      className="hidden lg:flex fixed left-0 top-0 h-full flex-col py-4 bg-white border-r border-border z-40 transition-[width] duration-300 overflow-hidden"
       role="navigation"
       aria-label="Huvudnavigation"
     >
