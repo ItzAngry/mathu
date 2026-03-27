@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabaseServer'
 import { callVision } from '@/lib/ai'
 import { enqueue } from '@/lib/aiQueue'
 
+export const maxDuration = 60
+
 export async function POST(request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
