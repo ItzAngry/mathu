@@ -12,7 +12,7 @@ export default function ProgressBar({ completed = 0, total = 1, label }) {
           <span className="text-sm font-medium text-text">
             {label ?? 'Din framgång'}
           </span>
-          <span className="text-sm font-bold text-primary" aria-live="polite">
+          <span className="text-sm font-bold text-success" aria-live="polite">
             {pct}%
           </span>
         </div>
@@ -25,7 +25,7 @@ export default function ProgressBar({ completed = 0, total = 1, label }) {
           aria-label={`${pct}% klart`}
         >
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-primary to-purple-400"
+            className="h-full rounded-full bg-gradient-to-r from-success to-emerald-400"
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
             transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}

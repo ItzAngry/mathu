@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
+import 'katex/dist/katex.min.css'
+import { renderIntroMarkdownToHtml } from '@/lib/renderIntroMarkdown'
 
 function Mascot({ size = 96 }) {
   return (
@@ -199,16 +201,16 @@ export default function MatheusPage() {
               >
                 {msg.role === 'assistant' && <SmallMascot />}
 
-                <div
-                  className={[
-                    'max-w-[75%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap shadow-sm',
-                    msg.role === 'user'
-                      ? 'bg-primary text-white rounded-2xl rounded-tr-sm'
-                      : 'bg-white text-text rounded-2xl rounded-tl-sm border border-border',
-                  ].join(' ')}
-                >
-                  {msg.content}
-                </div>
+                {msg.role === 'user' ? (
+                  <div className="max-w-[75%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap shadow-sm bg-primary text-white rounded-2xl rounded-tr-sm">
+                    {msg.content}
+                  </div>
+                ) : (
+                  <div
+                    className="max-w-[75%] px-4 py-3 text-sm shadow-sm bg-white text-text rounded-2xl rounded-tl-sm border border-border chat-message"
+                    dangerouslySetInnerHTML={{ __html: renderIntroMarkdownToHtml(msg.content) }}
+                  />
+                )}
               </motion.div>
             ))}
 
@@ -232,7 +234,7 @@ export default function MatheusPage() {
       </div>
 
       {/* ── Input bar ───────────────────────────────────────────────────── */}
-      <div className="bg-white border-t border-border px-4 py-4 shrink-0">
+      <div className="bg-white border-t border-border px-4 pt-4 pb-3 shrink-0">
         <form
           onSubmit={handleSubmit}
           className="max-w-2xl mx-auto flex items-end gap-3"
@@ -258,6 +260,9 @@ export default function MatheusPage() {
             </svg>
           </button>
         </form>
+        <p className="max-w-2xl mx-auto text-center text-xs text-text-muted/60 mt-2">
+          Matheus kan göra fel — dubbelkolla alltid svar med din lärare eller lärobok.
+        </p>
       </div>
     </div>
   )

@@ -7,6 +7,7 @@ import RoadmapNode from './RoadmapNode'
 import RoadmapConnector from './RoadmapConnector'
 import NodeModal from './NodeModal'
 import ChapterSkipModal from './ChapterSkipModal'
+import ChapterRestartModal from './ChapterRestartModal'
 import ChapterIcon from '@/components/ui/ChapterIcon'
 import {
   getSkippedChapterIds,
@@ -38,7 +39,9 @@ export default function RoadmapChapter({
   const [activeNode, setActiveNode] = useState(null)
   const [skipModalOpen, setSkipModalOpen] = useState(false)
   const [skipLoading, setSkipLoading] = useState(false)
+  const [restartModalOpen, setRestartModalOpen] = useState(false)
   const [restartLoading, setRestartLoading] = useState(false)
+  const [restartError, setRestartError] = useState(null)
   // Empty until after mount — must match SSR; localStorage is synced in useEffect.
   const [skippedIds, setSkippedIds] = useState(() => new Set())
 
@@ -69,21 +72,16 @@ export default function RoadmapChapter({
   const showRestartChip = canOfferRestartFromThisChapter
   const showSkipChip = chapterIndex >= 1 && !naturallyUnlocked && !skippedUnlocked
 
-  async function handleRestartFromThisChapter() {
-    if (
-      !confirm(
-        `Avklarmarkeringar i "${chapter.title}" och alla senare kapitel nollställs. Tidigare kapitel påverkas inte. Sparade kapitelhopp tas bort. Fortsätt?`
-      )
-    ) {
-      return
-    }
+  async function handleRestartConfirm() {
+    setRestartError(null)
     setRestartLoading(true)
     const result = await resetRoadmapProgressFromChapter(chapter.id)
     setRestartLoading(false)
     if (result.error) {
-      alert('Fel: ' + result.error)
+      setRestartError('Något gick fel: ' + result.error)
       return
     }
+    setRestartModalOpen(false)
     clearAllChapterSkipState()
     router.refresh()
   }
@@ -197,11 +195,11 @@ export default function RoadmapChapter({
               {showRestartChip && (
                 <button
                   type="button"
-                  onClick={() => void handleRestartFromThisChapter()}
+                  onClick={() => { setRestartError(null); setRestartModalOpen(true) }}
                   className={chapterJumpChipClass}
                   disabled={restartLoading || skipLoading}
                 >
-                  {restartLoading ? 'Nollställer…' : 'Börja om från detta kapitel'}
+                  Börja om från detta kapitel
                 </button>
               )}
               {showSkipChip && (
@@ -228,6 +226,15 @@ export default function RoadmapChapter({
             node={activeNode}
             progress={progressMap[activeNode.id]}
             onClose={() => setActiveNode(null)}
+          />
+        )}
+        {restartModalOpen && (
+          <ChapterRestartModal
+            chapterTitle={chapter.title}
+            loading={restartLoading}
+            error={restartError}
+            onClose={() => !restartLoading && setRestartModalOpen(false)}
+            onConfirm={handleRestartConfirm}
           />
         )}
         {skipModalOpen && (
