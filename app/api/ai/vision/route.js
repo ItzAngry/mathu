@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabaseServer'
-import { callVision } from '@/lib/ai'
-import { enqueue } from '@/lib/aiQueue'
+import { createClient, createServiceClient } from '@/lib/supabaseServer'
 
 export const maxDuration = 60
 
@@ -17,28 +15,50 @@ export async function POST(request) {
     return NextResponse.json({ error: 'No image provided' }, { status: 400 })
   }
 
-  // Get user's custom vision model URL if set
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('qwen_api_url')
-    .eq('id', user.id)
+  const admin = createServiceClient()
+
+  const { data: job, error: insertError } = await admin
+    .from('ai_jobs')
+    .insert({ type: 'vision', payload: { question, userAnswer, correctAnswer, imageBase64 } })
+    .select('id')
     .single()
 
-  let result
-  try {
-    result = await enqueue(() => callVision({
-      question,
-      userAnswer,
-      correctAnswer,
-      imageBase64,
-      customUrl: profile?.qwen_api_url || undefined,
-    }))
-  } catch (err) {
-    if (err.status === 429) {
-      return NextResponse.json({ error: err.message }, { status: 429 })
-    }
-    throw err
+  if (insertError || !job) {
+    console.error('ai_jobs insert error:', insertError)
+    return NextResponse.json({ error: 'Failed to queue AI job' }, { status: 500 })
   }
 
-  return NextResponse.json(result)
+  // Poll for result — worker on the Qwen machine will pick this up and write back.
+  const deadline = Date.now() + 55_000
+  while (Date.now() < deadline) {
+    await new Promise(r => setTimeout(r, 1000))
+
+    const { data: row } = await admin
+      .from('ai_jobs')
+      .select('status, result')
+      .eq('id', job.id)
+      .single()
+
+    if (row?.status === 'done') return NextResponse.json(row.result)
+    if (row?.status === 'error') {
+      return NextResponse.json({
+        correct: false,
+        methodCorrect: false,
+        finalAnswerCorrect: false,
+        completeness: 'incomplete',
+        explanation: 'Kunde inte analysera bilden just nu.',
+        reasoning: '',
+      })
+    }
+  }
+
+  await admin.from('ai_jobs').update({ status: 'error', result: { error: 'timeout' }, completed_at: new Date().toISOString() }).eq('id', job.id)
+  return NextResponse.json({
+    correct: false,
+    methodCorrect: false,
+    finalAnswerCorrect: false,
+    completeness: 'incomplete',
+    explanation: 'AI-modellen svarar inte. Kontrollera att worker-scriptet är igång.',
+    reasoning: '',
+  })
 }

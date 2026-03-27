@@ -6,7 +6,10 @@
       "Bash(npm run:*)",
       "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\elias.abdulahad\\\\Desktop\\\\mathu\\\\supabase\\\\migrations\")",
       "Bash(Out-Null)",
-      "Bash(Write-Host \"done\")"
+      "Bash(Write-Host \"done\")",
+      "Bash(find /c/Users/elias.abdulahad/Desktop/mathu -type f \\\\\\(-name *store* -o -name *context* -o -name *provider* \\\\\\))",
+      "Bash(xargs grep:*)",
+      "Bash(grep -r \"fetch.*api/ai\\\\|axios.*api/ai\" /c/Users/elias.abdulahad/Desktop/mathu --include=*.js --include=*.jsx --include=*.ts --include=*.tsx)"
     ]
   }
 }

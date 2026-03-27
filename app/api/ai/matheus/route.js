@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabaseServer'
-import { callMatheus } from '@/lib/ai'
-import { enqueue } from '@/lib/aiQueue'
+import { createClient, createServiceClient } from '@/lib/supabaseServer'
 
 export const maxDuration = 60
 
@@ -13,28 +11,44 @@ export async function POST(request) {
   const body = await request.json()
   const { question, userAnswer, correctAnswer, mode = 'check' } = body
 
-  // Get user's custom AI URL if set
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('mathew_api_url')
-    .eq('id', user.id)
+  const admin = createServiceClient()
+
+  const { data: job, error: insertError } = await admin
+    .from('ai_jobs')
+    .insert({ type: 'matheus', payload: { question, userAnswer, correctAnswer, mode } })
+    .select('id')
     .single()
 
-  let result
-  try {
-    result = await enqueue(() => callMatheus({
-      question,
-      userAnswer,
-      correctAnswer,
-      customUrl: profile?.mathew_api_url || undefined,
-      mode,
-    }))
-  } catch (err) {
-    if (err.status === 429) {
-      return NextResponse.json({ error: err.message }, { status: 429 })
-    }
-    throw err
+  if (insertError || !job) {
+    console.error('ai_jobs insert error:', insertError)
+    return NextResponse.json({ error: 'Failed to queue AI job' }, { status: 500 })
   }
 
-  return NextResponse.json(result)
+  // Poll for result — worker on the LM Studio machine will pick this up and write back.
+  const deadline = Date.now() + 55_000
+  while (Date.now() < deadline) {
+    await new Promise(r => setTimeout(r, 1000))
+
+    const { data: row } = await admin
+      .from('ai_jobs')
+      .select('status, result')
+      .eq('id', job.id)
+      .single()
+
+    if (row?.status === 'done') return NextResponse.json(row.result)
+    if (row?.status === 'error') {
+      return NextResponse.json(
+        mode === 'check'
+          ? { correct: false, explanation: 'Kunde inte nå Matheus just nu.', reasoning: '' }
+          : { response: 'Kunde inte nå Matheus just nu.' }
+      )
+    }
+  }
+
+  await admin.from('ai_jobs').update({ status: 'error', result: { error: 'timeout' }, completed_at: new Date().toISOString() }).eq('id', job.id)
+  return NextResponse.json(
+    mode === 'check'
+      ? { correct: false, explanation: 'AI-modellen svarar inte. Kontrollera att worker-scriptet är igång.', reasoning: '' }
+      : { response: 'AI-modellen svarar inte just nu.' }
+  )
 }
