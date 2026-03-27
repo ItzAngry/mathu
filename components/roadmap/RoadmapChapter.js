@@ -7,6 +7,7 @@ import RoadmapNode from './RoadmapNode'
 import RoadmapConnector from './RoadmapConnector'
 import NodeModal from './NodeModal'
 import ChapterSkipModal from './ChapterSkipModal'
+import ChapterIcon from '@/components/ui/ChapterIcon'
 import {
   getSkippedChapterIds,
   addSkippedChapter,
@@ -169,11 +170,11 @@ export default function RoadmapChapter({
         className="flex items-center gap-3 mt-4 mb-2 px-6"
       >
         <div
-          className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl shadow-sm shrink-0"
+          className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm shrink-0"
           style={{ backgroundColor: chapter.color + '22', color: chapter.color }}
           aria-hidden="true"
         >
-          {chapter.icon}
+          <ChapterIcon chapter={chapter} style={{ width: '55%', height: '55%' }} />
         </div>
         <div>
           <div className="flex flex-wrap items-center gap-2">

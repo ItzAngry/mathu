@@ -18,10 +18,8 @@ export async function GET(request) {
     .eq('id', user.id)
     .single()
 
+  const mode = searchParams.get('mode') // 'mixed' = no grade filter
   const targetGrade = gradeLevel || profile?.grade_goal || 'C'
-  const gradeOrder = ['E', 'D', 'C', 'B', 'A']
-  const targetIdx = gradeOrder.indexOf(targetGrade)
-  const allowedGrades = gradeOrder.slice(0, targetIdx + 1)
 
   let query = supabase
     .from('questions')
@@ -31,9 +29,9 @@ export async function GET(request) {
   if (nodeId) query = query.eq('node_id', nodeId)
   else if (chapterId) query = query.eq('chapter_id', chapterId)
 
-  // Filter by grade level (include questions at or below target grade)
-  if (allowedGrades.length > 0) {
-    query = query.or(`grade_level.in.(${allowedGrades.join(',')}),grade_level.is.null`)
+  // Filter by grade level: exact match for user's grade, or all grades in mixed mode
+  if (mode !== 'mixed') {
+    query = query.or(`grade_level.eq.${targetGrade},grade_level.is.null`)
   }
 
   const { data: questions, error } = await query
