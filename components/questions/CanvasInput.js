@@ -2,8 +2,13 @@
 
 import { useRef, useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react'
 
-const CanvasInput = forwardRef(function CanvasInput({ width = 600, height = 250, onHasContent }, ref) {
+const CanvasInput = forwardRef(function CanvasInput(
+  { width = 600, height = 250, onHasContent, fillContainer = false },
+  ref
+) {
   const canvasRef = useRef(null)
+  const sizeContainerRef = useRef(null)
+  const hasContentRef = useRef(false)
   const [isDrawing, setIsDrawing] = useState(false)
   const [color, setColor] = useState('#1a1a1a')
   const [lineWidth, setLineWidth] = useState(3)
@@ -23,21 +28,15 @@ const CanvasInput = forwardRef(function CanvasInput({ width = 600, height = 250,
       const ctx = canvas?.getContext('2d')
       if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.fillStyle = '#FFFFFF'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
         setHasContent(false)
+        hasContentRef.current = false
         onHasContent?.(false)
       }
     },
     hasContent,
   }))
-
-  // Set canvas size to match display size on mount and resize
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    ctx.fillStyle = '#FFFFFF'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-  }, [])
 
   function getPos(e, canvas) {
     const rect = canvas.getBoundingClientRect()
@@ -82,6 +81,7 @@ const CanvasInput = forwardRef(function CanvasInput({ width = 600, height = 250,
 
     if (!hasContent) {
       setHasContent(true)
+      hasContentRef.current = true
       onHasContent?.(true)
     }
   }, [isDrawing, color, lineWidth, tool, hasContent, onHasContent])
@@ -99,14 +99,81 @@ const CanvasInput = forwardRef(function CanvasInput({ width = 600, height = 250,
       ctx.fillStyle = '#FFFFFF'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       setHasContent(false)
+      hasContentRef.current = false
       onHasContent?.(false)
     }
   }
 
+  useEffect(() => {
+    hasContentRef.current = hasContent
+  }, [hasContent])
+
+  useEffect(() => {
+    if (fillContainer) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+  }, [fillContainer, width, height])
+
+  useEffect(() => {
+    if (!fillContainer) return
+    const canvas = canvasRef.current
+    const el = sizeContainerRef.current
+    if (!canvas || !el) return
+
+    let raf = 0
+    function sync() {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect()
+        const dpr = Math.min(window.devicePixelRatio || 1, 2.5)
+        const w = Math.max(2, Math.round(rect.width * dpr))
+        const h = Math.max(2, Math.round(rect.height * dpr))
+        if (w < 2 || h < 2) return
+        if (canvas.width === w && canvas.height === h) return
+
+        const had = hasContentRef.current && canvas.width > 0 && canvas.height > 0
+        const prev = had ? canvas.toDataURL('image/png') : null
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext('2d')
+        ctx.fillStyle = '#FFFFFF'
+        ctx.fillRect(0, 0, w, h)
+        if (prev) {
+          const img = new Image()
+          img.onload = () => {
+            ctx.drawImage(img, 0, 0, w, h)
+          }
+          img.onerror = () => {
+            hasContentRef.current = false
+            setHasContent(false)
+            onHasContent?.(false)
+          }
+          img.src = prev
+        }
+      })
+    }
+
+    sync()
+    const ro = new ResizeObserver(sync)
+    ro.observe(el)
+    return () => {
+      cancelAnimationFrame(raf)
+      ro.disconnect()
+    }
+  }, [fillContainer, onHasContent])
+
+  const rootClass = fillContainer ? 'flex flex-col flex-1 min-h-0 gap-2' : 'flex flex-col gap-2'
+  const frameClass = fillContainer
+    ? 'relative flex-1 min-h-0 rounded-2xl overflow-hidden border-2 border-border shadow-inner bg-white touch-none'
+    : 'relative rounded-2xl overflow-hidden border-2 border-border shadow-inner bg-white touch-none'
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className={rootClass}>
       {/* Toolbar */}
-      <div className="flex items-center gap-2 flex-wrap" role="toolbar" aria-label="Ritverktyg">
+      <div className="flex items-center gap-2 flex-wrap shrink-0" role="toolbar" aria-label="Ritverktyg">
         {/* Pen/Eraser */}
         <button
           type="button"
@@ -167,12 +234,12 @@ const CanvasInput = forwardRef(function CanvasInput({ width = 600, height = 250,
       </div>
 
       {/* Canvas */}
-      <div className="relative rounded-2xl overflow-hidden border-2 border-border shadow-inner bg-white touch-none">
+      <div ref={fillContainer ? sizeContainerRef : undefined} className={frameClass}>
         <canvas
           ref={canvasRef}
-          width={width}
-          height={height}
-          className="w-full block cursor-crosshair"
+          width={fillContainer ? 2 : width}
+          height={fillContainer ? 2 : height}
+          className={fillContainer ? 'h-full w-full block cursor-crosshair' : 'w-full block cursor-crosshair'}
           style={{ touchAction: 'none' }}
           onMouseDown={startDrawing}
           onMouseMove={draw}

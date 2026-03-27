@@ -156,34 +156,6 @@ export default function SettingsPage() {
               <input type="hidden" name="dark_mode" value={String(settings.darkMode)} />
             </div>
 
-            {/* TTS */}
-            <div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-text">{t.settings.tts}</p>
-                  <p className="text-xs text-text-muted mt-0.5">{t.settings.ttsDescription}</p>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={settings.tts}
-                  onClick={() => updateSettings({ tts: !settings.tts })}
-                  className={[
-                    'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-primary',
-                    settings.tts ? 'bg-primary' : 'bg-border',
-                  ].join(' ')}
-                  aria-label={t.settings.tts}
-                >
-                  <span
-                    className={[
-                      'inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform',
-                      settings.tts ? 'translate-x-6' : 'translate-x-1',
-                    ].join(' ')}
-                  />
-                </button>
-              </div>
-              <input type="hidden" name="tts_enabled" value={String(settings.tts)} />
-            </div>
           </section>
 
           {/* Grade goal */}

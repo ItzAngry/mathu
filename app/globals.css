@@ -300,3 +300,16 @@ html[data-font="dyslexic"] .font-mono {
   overflow: auto;
   resize: vertical;
 }
+
+/* Split-layout (/prov): fyll högerkolumnens höjd — ingen vertikal resize (undviker kapad rityta) */
+.question-workspace-split {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-height: 0;
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  resize: none;
+}
