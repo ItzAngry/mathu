@@ -323,7 +323,10 @@ export default function AnswerChecker({
               {showCalculator ? (
                 <QuestionCalculator key={question.id} />
               ) : null}
-              {submitRow}
+              {/* Sticky on mobile so the button stays visible even when the canvas aside pushes content down */}
+              <div className="sticky bottom-0 bg-white pt-2 pb-1 -mx-4 px-4 sm:-mx-5 sm:px-5 lg:static lg:bg-transparent lg:pt-0 lg:pb-0 lg:mx-0 lg:px-0">
+                {submitRow}
+              </div>
             </form>
           )}
         </div>
@@ -340,7 +343,7 @@ export default function AnswerChecker({
 
         {showRightPanel && (
           <aside
-            className="flex flex-col min-h-[min(52dvh,480px)] lg:min-h-0 lg:h-full shrink-0 bg-surface-2/60 border-t lg:border-t-0 border-border"
+            className="flex flex-col min-h-[min(42dvh,380px)] lg:min-h-0 lg:h-full shrink-0 bg-surface-2/60 border-t lg:border-t-0 border-border"
             style={isDesktop ? { width: `${100 - leftWidth}%`, minWidth: '50%' } : {}}
           >
             {showGeoGebra ? (

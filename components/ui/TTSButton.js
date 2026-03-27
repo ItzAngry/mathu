@@ -1,12 +1,26 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { resolvePublicAudioUrl } from '@/lib/resolveAudioUrl'
 
 export default function TTSButton({ text, audioUrl, label = 'Lyssna' }) {
   const [playing, setPlaying] = useState(false)
   const audioRef = useRef(null)
   const utteranceRef = useRef(null)
+
+  // Stop all playback when the component unmounts (e.g. modal closes)
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+        audioRef.current = null
+      }
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel()
+      }
+    }
+  }, [])
 
   const resolvedAudioUrl = resolvePublicAudioUrl(audioUrl)
   const hasAudioFile = Boolean(resolvedAudioUrl)
