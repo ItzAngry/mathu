@@ -14,6 +14,7 @@ Tävlingskategorier:
 Projekt- & Teknisk beskrivning
 
 Motivering och Introduktion
+
 MathU syftar till att främja motivation och kunskap inom ämnet matematik. För denna demo har vi specifikt lagt fokus på kursen "MA1B", då det finns ett starkt underlag för ett förbättringsbehov här. Enligt betygskatalogen har vi resultat från kursen som sträcker sig tillbaka till 2014. Av 421 resultat har ca 12% (ca 50 elever) fått underkänt, och 54% (ca 230 elever) fått betyget E. MathU är skapat för att höja dessa resultat genom att erbjuda personlig AI-rättning och feedback på plattformen.
 
 Teknisk beskrivning
