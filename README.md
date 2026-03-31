@@ -31,7 +31,7 @@ Framer-Motion: Ramverk för animationer, t.ex. knappanimationer och hover-effekt
 Vercel: Används för hosting av plattformen.
 
 Backend, Nätverk och AI
-Supabase: Används som databas och authentication 
+Supabase: Används som databas och authentication
 LM Studio (Lokala AI-modeller): Vi använder modellerna Qwen 3.5 9b (Vision, Tool & Text) och Qwen 3 4b som ryggraden i vår rättnings- och feedbackmotor.
 TailScale: Virtuellt lokalt nätverk som ger ut en virtuell lokal IP-adress till alla anslutna maskiner. Detta låter våra webbklienter kommunicera säkert med våra lokala AI-modeller.
 HumanFS: Tolk för att förenkla filhantering i Node.js
